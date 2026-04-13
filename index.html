@@ -71,73 +71,104 @@
         </div>
     </main>
 
-    <script>
-        let xp = parseInt(localStorage.getItem('sl_xp')) || 0;
-        let lvl = parseInt(localStorage.getItem('sl_lvl')) || 1;
-        let str = parseInt(localStorage.getItem('sl_str')) || 10;
-        let int = parseInt(localStorage.getItem('sl_int')) || 10;
+<script>
+    // 🔊 ENGINE DE ÁUDIO DO SISTEMA
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        const titles = {
-            1: "O MAIS FRACO (E-RANK)",
-            5: "CAÇADOR EM ASCENSÃO",
-            10: "DESPERTADO (D-RANK)",
-            25: "O MONARCA DAS SOMBRAS"
-        };
+    function playSystemSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-        function updateUI() {
-            let currentTitle = titles[1];
-            Object.keys(titles).forEach(level => {
-                if(lvl >= parseInt(level)) currentTitle = titles[level];
-            });
-
-            document.getElementById('lvl-display').innerText = `LV. ${lvl < 10 ? '0'+lvl : lvl}`;
-            document.getElementById('player-title').innerText = currentTitle;
-            document.getElementById('xp-bar').style.width = xp + "%";
-            document.getElementById('xp-num').innerText = xp;
-            document.getElementById('str-val').innerText = str;
-            document.getElementById('int-val').innerText = int;
-            
-            localStorage.setItem('sl_xp', xp);
-            localStorage.setItem('sl_lvl', lvl);
-            localStorage.setItem('sl_str', str);
-            localStorage.setItem('sl_int', int);
+        if(type === 'click') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } 
+        else if(type === 'levelUp') {
+            const now = audioCtx.currentTime;
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.5);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(); osc.stop(now + 0.5);
         }
+    }
 
-        function addXP(amt, type) {
-            xp += amt;
-            if(type === 'str') str++;
-            if(type === 'int') int++;
-            
-            if(xp >= 100) {
-                xp = 0;
-                lvl++;
-                alert("LEVEL UP: VOCÊ ESTÁ FICANDO MAIS FORTE!");
-            }
-            updateUI();
+    // 💾 LÓGICA DE DADOS
+    let xp = parseInt(localStorage.getItem('sl_xp')) || 0;
+    let lvl = parseInt(localStorage.getItem('sl_lvl')) || 1;
+    let str = parseInt(localStorage.getItem('sl_str')) || 10;
+    let int = parseInt(localStorage.getItem('sl_int')) || 10;
+
+    const titles = {
+        1: "O MAIS FRACO (E-RANK)",
+        5: "CAÇADOR EM ASCENSÃO",
+        10: "DESPERTADO (D-RANK)",
+        25: "O MONARCA DAS SOMBRAS"
+    };
+
+    function updateUI() {
+        let currentTitle = titles[1];
+        Object.keys(titles).forEach(level => {
+            if(lvl >= parseInt(level)) currentTitle = titles[level];
+        });
+
+        document.getElementById('lvl-display').innerText = `LV. ${lvl < 10 ? '0'+lvl : lvl}`;
+        document.getElementById('player-title').innerText = currentTitle;
+        document.getElementById('xp-bar').style.width = xp + "%";
+        document.getElementById('xp-num').innerText = xp;
+        document.getElementById('str-val').innerText = str;
+        document.getElementById('int-val').innerText = int;
+        
+        localStorage.setItem('sl_xp', xp);
+        localStorage.setItem('sl_lvl', lvl);
+        localStorage.setItem('sl_str', str);
+        localStorage.setItem('sl_int', int);
+    }
+
+    function addXP(amt, type) {
+        playSystemSound('click'); // <--- GERA O SOM NO CLIQUE
+        xp += amt;
+        if(type === 'str') str++;
+        if(type === 'int') int++;
+        
+        if(xp >= 100) {
+            xp = 0;
+            lvl++;
+            playSystemSound('levelUp'); // <--- SOM ÉPICO
+            alert("LEVEL UP: O SISTEMA RECONHECE SUA FORÇA!");
         }
+        updateUI();
+    }
 
-        function resetSystem() {
-            if(confirm("Deseja resetar seu progresso, Player?")) {
-                localStorage.clear();
-                location.reload();
-            }
+    function resetSystem() {
+        if(confirm("Deseja resetar seu progresso, Player?")) {
+            localStorage.clear();
+            location.reload();
         }
+    }
 
-        window.onload = () => {
-            updateUI();
-            setTimeout(() => { 
-                document.getElementById('boot-text').innerText = "ACESSO CONCEDIDO"; 
-                document.getElementById('boot-text').style.color = "#00ff00";
-            }, 1500);
-            setTimeout(() => { 
-                document.getElementById('boot').style.opacity = '0';
-                document.getElementById('hud').style.display = 'flex';
-                setTimeout(() => {
-                    document.getElementById('hud').style.opacity = '1';
-                    document.getElementById('boot').style.display = 'none';
-                }, 100);
-            }, 3000);
-        };
-    </script>
+    window.onload = () => {
+        updateUI();
+        setTimeout(() => { 
+            document.getElementById('boot-text').innerText = "ACESSO CONCEDIDO"; 
+            document.getElementById('boot-text').style.color = "#00ff00";
+        }, 1500);
+        setTimeout(() => { 
+            document.getElementById('boot').style.opacity = '0';
+            document.getElementById('hud').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('hud').style.opacity = '1';
+                document.getElementById('boot').style.display = 'none';
+            }, 100);
+        }, 3000);
+    };
+</script>
 </body>
 </html>
