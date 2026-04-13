@@ -10,7 +10,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
         body { background: var(--dark); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        #boot { position: fixed; inset: 0; background: black; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 1s; }
+        #boot { position: fixed; inset: 0; background: black; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 1s; cursor: pointer; }
         .scanner { width: 120px; height: 120px; border: 3px solid #111; border-top: 3px solid var(--neon); border-radius: 50%; animation: spin 1s linear infinite; filter: drop-shadow(0 0 10px var(--neon)); }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
@@ -20,24 +20,22 @@
         .title-tag { font-size: 0.7rem; color: #fff; background: rgba(0,212,255,0.2); padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block; letter-spacing: 1px; }
         
         .xp-bg { background: #111; height: 6px; margin: 10px 0; border-radius: 3px; overflow: hidden; border: 1px solid #222; }
-        #xp-bar { background: var(--neon); height: 100%; width: 0%; transition: 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67); box-shadow: 0 0 15px var(--neon); }
+        #xp-bar { background: var(--neon); height: 100%; width: 0%; transition: 0.8s; box-shadow: 0 0 15px var(--neon); }
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        .card { background: var(--panel); border-left: 3px solid var(--neon); padding: 15px; border-radius: 4px; position: relative; overflow: hidden; }
-        .card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0,212,255,0.05)); }
+        .card { background: var(--panel); border-left: 3px solid var(--neon); padding: 15px; border-radius: 4px; }
         .label { font-size: 0.65rem; color: #888; text-transform: uppercase; }
         .val { font-size: 1.8rem; font-weight: bold; font-family: 'Orbitron'; }
 
-        .quest-box { background: rgba(20, 20, 30, 0.8); border: 1px solid rgba(0, 212, 255, 0.2); padding: 15px; border-radius: 5px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
-        .quest-box:active { background: rgba(0, 212, 255, 0.1); }
+        .quest-box { background: rgba(20, 20, 30, 0.8); border: 1px solid rgba(0, 212, 255, 0.2); padding: 15px; border-radius: 5px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; }
     </style>
 </head>
 <body>
 
-    <div id="boot">
+    <div id="boot" onclick="startSystem()">
         <div class="scanner"></div>
-        <p id="boot-text" style="margin-top:20px; color:var(--neon); font-family:Orbitron; letter-spacing:2px; font-size: 0.8rem;">SISTEMA ANALISANDO PLAYER...</p>
+        <p id="boot-text" style="margin-top:20px; color:var(--neon); font-family:Orbitron; letter-spacing:2px; font-size: 0.8rem; text-align: center;">BIOMETRIA NECESSÁRIA<br><span style="font-size: 0.6rem; color: #555;">(TOQUE NA TELA PARA INICIAR)</span></p>
     </div>
 
     <main id="hud">
@@ -45,7 +43,7 @@
             <div class="lvl-tag">JOGADOR: JIN-WOO <span id="lvl-display" style="float:right">LV. 01</span></div>
             <div id="player-title" class="title-tag">O MAIS FRACO (E-RANK)</div>
             <div class="xp-bg"><div id="xp-bar"></div></div>
-            <div style="font-size:0.6rem; color:#888; letter-spacing: 1px;">XP: <span id="xp-num">0</span> / 100</div>
+            <div style="font-size:0.6rem; color:#888;">XP: <span id="xp-num">0</span> / 100</div>
         </header>
 
         <div class="grid">
@@ -53,7 +51,7 @@
             <div class="card"><div class="label">Inteligência (INT)</div><div class="val" id="int-val">10</div></div>
         </div>
 
-        <p style="font-family:Orbitron; font-size:0.7rem; margin-bottom:12px; color:var(--neon); letter-spacing: 1px;">MISSÕES DIÁRIAS</p>
+        <p style="font-family:Orbitron; font-size:0.7rem; margin-bottom:12px; color:var(--neon);">MISSÕES DIÁRIAS</p>
         
         <div class="quest-box">
             <div><div class="label" style="color:var(--neon)">FÍSICO</div><div style="font-size:0.9rem">Treino de Força</div></div>
@@ -66,109 +64,93 @@
         </div>
 
         <div style="margin-top:auto; display:flex; justify-content:space-between; padding-bottom:10px">
-            <button class="btn" style="width:48%; opacity: 0.6">INVENTÁRIO</button>
+            <button class="btn" style="width:48%; opacity: 0.5;">INVENTÁRIO</button>
             <button class="btn" style="width:48%" onclick="resetSystem()">RESET</button>
         </div>
     </main>
 
-<script>
-    // 🔊 ENGINE DE ÁUDIO DO SISTEMA
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    <script>
+        let audioCtx;
 
-    function playSystemSound(type) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        if(type === 'click') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        } 
-        else if(type === 'levelUp') {
-            const now = audioCtx.currentTime;
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(440, now);
-            osc.frequency.exponentialRampToValueAtTime(880, now + 0.5);
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-            osc.start(); osc.stop(now + 0.5);
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
-    }
 
-    // 💾 LÓGICA DE DADOS
-    let xp = parseInt(localStorage.getItem('sl_xp')) || 0;
-    let lvl = parseInt(localStorage.getItem('sl_lvl')) || 1;
-    let str = parseInt(localStorage.getItem('sl_str')) || 10;
-    let int = parseInt(localStorage.getItem('sl_int')) || 10;
+        function playSystemSound(type) {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
 
-    const titles = {
-        1: "O MAIS FRACO (E-RANK)",
-        5: "CAÇADOR EM ASCENSÃO",
-        10: "DESPERTADO (D-RANK)",
-        25: "O MONARCA DAS SOMBRAS"
-    };
-
-    function updateUI() {
-        let currentTitle = titles[1];
-        Object.keys(titles).forEach(level => {
-            if(lvl >= parseInt(level)) currentTitle = titles[level];
-        });
-
-        document.getElementById('lvl-display').innerText = `LV. ${lvl < 10 ? '0'+lvl : lvl}`;
-        document.getElementById('player-title').innerText = currentTitle;
-        document.getElementById('xp-bar').style.width = xp + "%";
-        document.getElementById('xp-num').innerText = xp;
-        document.getElementById('str-val').innerText = str;
-        document.getElementById('int-val').innerText = int;
-        
-        localStorage.setItem('sl_xp', xp);
-        localStorage.setItem('sl_lvl', lvl);
-        localStorage.setItem('sl_str', str);
-        localStorage.setItem('sl_int', int);
-    }
-
-    function addXP(amt, type) {
-        playSystemSound('click'); // <--- GERA O SOM NO CLIQUE
-        xp += amt;
-        if(type === 'str') str++;
-        if(type === 'int') int++;
-        
-        if(xp >= 100) {
-            xp = 0;
-            lvl++;
-            playSystemSound('levelUp'); // <--- SOM ÉPICO
-            alert("LEVEL UP: O SISTEMA RECONHECE SUA FORÇA!");
+            if(type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if(type === 'levelUp') {
+                const now = audioCtx.currentTime;
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.5);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(); osc.stop(now + 0.5);
+            }
         }
-        updateUI();
-    }
 
-    function resetSystem() {
-        if(confirm("Deseja resetar seu progresso, Player?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-
-    window.onload = () => {
-        updateUI();
-        setTimeout(() => { 
-            document.getElementById('boot-text').innerText = "ACESSO CONCEDIDO"; 
+        function startSystem() {
+            initAudio();
+            playSystemSound('click');
+            document.getElementById('boot-text').innerText = "ACESSO AUTORIZADO";
             document.getElementById('boot-text').style.color = "#00ff00";
-        }, 1500);
-        setTimeout(() => { 
-            document.getElementById('boot').style.opacity = '0';
-            document.getElementById('hud').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('hud').style.opacity = '1';
-                document.getElementById('boot').style.display = 'none';
-            }, 100);
-        }, 3000);
-    };
-</script>
+
+            setTimeout(() => { 
+                document.getElementById('boot').style.opacity = '0';
+                document.getElementById('hud').style.display = 'flex';
+                setTimeout(() => {
+                    document.getElementById('hud').style.opacity = '1';
+                    document.getElementById('boot').style.display = 'none';
+                }, 100);
+            }, 1000);
+        }
+
+        let xp = parseInt(localStorage.getItem('sl_xp')) || 0;
+        let lvl = parseInt(localStorage.getItem('sl_lvl')) || 1;
+        let str = parseInt(localStorage.getItem('sl_str')) || 10;
+        let int = parseInt(localStorage.getItem('sl_int')) || 10;
+
+        const titles = { 1: "O MAIS FRACO (E-RANK)", 5: "CAÇADOR EM ASCENSÃO", 10: "DESPERTADO (D-RANK)", 25: "O MONARCA DAS SOMBRAS" };
+
+        function updateUI() {
+            let currentTitle = titles[1];
+            Object.keys(titles).forEach(level => { if(lvl >= parseInt(level)) currentTitle = titles[level]; });
+            document.getElementById('lvl-display').innerText = `LV. ${lvl < 10 ? '0'+lvl : lvl}`;
+            document.getElementById('player-title').innerText = currentTitle;
+            document.getElementById('xp-bar').style.width = xp + "%";
+            document.getElementById('xp-num').innerText = xp;
+            document.getElementById('str-val').innerText = str;
+            document.getElementById('int-val').innerText = int;
+            localStorage.setItem('sl_xp', xp); localStorage.setItem('sl_lvl', lvl); localStorage.setItem('sl_str', str); localStorage.setItem('sl_int', int);
+        }
+
+        function addXP(amt, type) {
+            playSystemSound('click');
+            xp += amt;
+            if(type === 'str') str++; else if(type === 'int') int++;
+            if(xp >= 100) { xp = 0; lvl++; playSystemSound('levelUp'); alert("LEVEL UP!"); }
+            updateUI();
+        }
+
+        function resetSystem() { if(confirm("Resetar progresso?")) { localStorage.clear(); location.reload(); } }
+
+        window.onload = updateUI;
+    </script>
 </body>
 </html>
