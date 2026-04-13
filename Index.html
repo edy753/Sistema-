@@ -1,0 +1,92 @@
+<main id="main-system">
+        <header>
+            <div class="player-name">SUNG JIN-WOO <span class="level-badge" id="lvl-display">LV. 01</span></div>
+            <div class="xp-container" style="width: 100%; height: 5px; background: #222; margin-top: 5px;">
+                <div id="xp-bar" style="width: 0%; height: 100%; background: var(--neon-blue); transition: width 0.5s;"></div>
+            </div>
+            <div style="font-size: 0.6rem; color: #888; margin-top: 2px;">XP: <span id="xp-num">0</span> / 100</div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card" onclick="playClick()">
+                <div class="stat-label">Força (STR)</div>
+                <div class="stat-value" id="str-val">10</div>
+            </div>
+            <div class="stat-card" onclick="playClick()">
+                <div class="stat-label">Inteligência (INT)</div>
+                <div class="stat-value" id="int-val">10</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <p class="status-text" style="font-size: 0.7rem; border-left: 2px solid var(--neon-blue); padding-left: 5px;">MISSÕES DIÁRIAS</p>
+            
+            <div class="stat-card" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;" id="quest-1">
+                <div>
+                    <div class="stat-label" style="color: var(--neon-blue);">MISSÃO: SUPERAR LIMITES</div>
+                    <div style="font-size: 0.9rem;">Flexões (0/100)</div>
+                </div>
+                <button class="btn-action" onclick="completeQuest(25, 'str')">+25 XP</button>
+            </div>
+
+            <div class="stat-card" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;" id="quest-2">
+                <div>
+                    <div class="stat-label" style="color: #a333ff;">MISSÃO: CONHECIMENTO</div>
+                    <div style="font-size: 0.9rem;">Ler 30 min</div>
+                </div>
+                <button class="btn-action" onclick="completeQuest(30, 'int')" style="border-color: #a333ff; color: #a333ff;">+30 XP</button>
+            </div>
+        </div>
+
+        <footer>
+            <button class="btn-action" onclick="alert('Inventário: Vazio')">INVENTÁRIO</button>
+            <button class="btn-action" onclick="location.reload()">SYNC</button>
+        </footer>
+    </main>
+
+    <script>
+        let xp = 0;
+        let lvl = 1;
+        let str = 10;
+        let int = 10;
+
+        function playSound(freq, type, duration) {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playClick() { playSound(800, 'square', 0.1); }
+        function playLevelUp() { 
+            playSound(400, 'sine', 0.2); 
+            setTimeout(() => playSound(600, 'sine', 0.2), 100);
+            setTimeout(() => playSound(800, 'sine', 0.4), 200);
+        }
+
+        function completeQuest(amount, type) {
+            xp += amount;
+            playClick();
+            
+            if(type === 'str') { str++; document.getElementById('str-val').innerText = str; }
+            if(type === 'int') { int++; document.getElementById('int-val').innerText = int; }
+
+            if (xp >= 100) {
+                xp = xp - 100;
+                lvl++;
+                playLevelUp();
+                document.getElementById('lvl-display').innerText = `LV. ${lvl < 10 ? '0'+lvl : lvl}`;
+                alert("VOCÊ SUBIU DE NÍVEL!");
+            }
+
+            document.getElementById('xp-bar').style.width = xp + "%";
+            document.getElementById('xp-num').innerText = xp;
+        }
+
+        // ... manter a lógica de boot anterior ...
+              </script>
+
