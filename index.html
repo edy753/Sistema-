@@ -3,188 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SOLO LEVELING: APEX SUPREME</title>
+    <title>NEXUS | THE SYSTEM</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon: #00d4ff; --bg: #020204; --card: rgba(20, 20, 30, 0.6);
-            --gold: #ffd700; --red: #ff0044; --green: #00ff88; --purple: #bc13fe;
-            --accent: var(--neon);
+            --primary: #00f2ff; --bg: #050508; --surface: #0a0a0f;
+            --accent: #bc13fe; --gold: #ffd700; --red: #ff0044;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; }
 
-        /* Fundo Dinâmico */
-        .aura { position: fixed; inset: 0; background: radial-gradient(circle at 50% -10%, var(--accent), transparent 70%); opacity: 0.15; z-index: -1; transition: 1s; }
-
-        /* Navegação Inferior (Abas) */
-        nav { 
-            position: fixed; bottom: 0; width: 100%; background: rgba(10, 10, 15, 0.95); 
-            display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
-        .nav-item { color: #555; font-family: 'Orbitron'; font-size: 0.6rem; text-align: center; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--accent); transform: translateY(-5px); text-shadow: 0 0 10px var(--accent); }
+        /* Background Dinâmico Nexus */
+        .nexus-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, #10101a 0%, #050508 100%); z-index: -1; }
+        .nexus-bg::after { content: ""; position: absolute; inset: 0; background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); opacity: 0.1; }
 
         /* Telas */
-        .screen { flex: 1; display: none; flex-direction: column; padding: 25px; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.4s ease; }
-        .active-screen { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .screen { position: fixed; inset: 0; display: none; flex-direction: column; padding: 25px; overflow-y: auto; background: var(--bg); z-index: 100; transition: 0.5s; }
+        .active { display: flex; animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
 
-        /* Elementos Premium */
-        header { margin-bottom: 30px; border-left: 4px solid var(--accent); padding-left: 15px; }
-        .rank-title { font-family: 'Orbitron'; font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; }
-        .player-name { font-family: 'Orbitron'; font-size: 1.8rem; font-weight: 900; text-transform: uppercase; }
+        /* Quiz/Onboarding Style */
+        .quiz-option { background: var(--surface); border: 1px solid #1a1a25; padding: 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
+        .quiz-option:active { border-color: var(--primary); background: rgba(0, 242, 255, 0.05); }
+        .quiz-option h4 { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--primary); }
 
-        .stat-card { background: var(--card); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin-bottom: 15px; position: relative; overflow: hidden; }
-        .stat-card::before { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: var(--accent); }
+        /* HUD Premium */
+        .hud-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hud-rank { font-family: 'Orbitron'; font-size: 0.6rem; letter-spacing: 2px; color: var(--accent); }
+        .hud-name { font-family: 'Orbitron'; font-weight: 900; font-size: 1.4rem; text-transform: uppercase; }
 
-        .xp-bar-wrap { background: rgba(255,255,255,0.03); height: 8px; border-radius: 10px; margin: 15px 0; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
-        .xp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #fff); width: 0%; transition: 1s cubic-bezier(0.1, 0.9, 0.2, 1); box-shadow: 0 0 15px var(--accent); }
+        /* XP e Progressão */
+        .xp-card { background: var(--surface); border: 1px solid #1a1a25; padding: 20px; border-radius: 16px; margin-bottom: 20px; position: relative; }
+        .xp-bar-bg { background: #000; height: 6px; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .xp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; transition: 1.5s cubic-bezier(0.2, 1, 0.2, 1); box-shadow: 0 0 15px var(--primary); }
 
-        .mission-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-action { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 18px; font-family: 'Orbitron'; font-size: 0.6rem; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        .btn-action:active { background: var(--accent); color: #000; }
+        /* Menu de Abas Inferior Estilo Nexus */
+        .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.9); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; }
+        .tab-item { text-align: center; color: #444; font-family: 'Orbitron'; font-size: 0.5rem; transition: 0.3s; }
+        .tab-item.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
 
-        /* Loja de Itens */
-        .shop-item { background: linear-gradient(135deg, rgba(255,215,0,0.1), transparent); border: 1px solid rgba(255,215,0,0.2); padding: 20px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        
-        #setup-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; justify-content: center; padding: 40px; }
-        .input-premium { background: #0d0d12; border: 1px solid #222; padding: 20px; color: #fff; border-radius: 10px; margin-bottom: 15px; font-family: 'Orbitron'; width: 100%; }
+        /* Cards de Missão */
+        .mission-card { background: var(--surface); border-left: 4px solid var(--primary); padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-nexus { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; font-family: 'Orbitron'; font-size: 0.6rem; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="aura" id="aura"></div>
+    <div class="nexus-bg"></div>
 
-    <div id="setup-overlay">
-        <h1 style="font-family:'Orbitron'; color:var(--neon); text-align:center; margin-bottom:40px; letter-spacing:10px;">DESPERTAR</h1>
-        <input type="text" id="nIn" class="input-premium" placeholder="NOME DO CAÇADOR">
-        <button class="btn-action" style="width:100%; padding:20px;" onclick="init()">VINCULAR ALMA</button>
+    <div id="scr-quiz" class="screen active">
+        <h1 style="font-family:'Orbitron'; text-align:center; margin: 40px 0; font-size: 1.2rem; color: var(--primary);">DEFINA SEU CAMINHO</h1>
+        <p style="text-align:center; color:#666; font-size: 0.8rem; margin-bottom: 30px;">O sistema irá calibrar suas missões com base no seu objetivo principal.</p>
+        
+        <div class="quiz-option" onclick="setGoal('monstro', 'físico')">
+            <h4>GANHO DE MASSA</h4>
+            <p style="font-size:0.7rem; color:#555;">Foco em hipertrofia e força bruta.</p>
+        </div>
+        <div class="quiz-option" onclick="setGoal('sombra', 'agilidade')">
+            <h4>DEFINIÇÃO EXTREMA</h4>
+            <p style="font-size:0.7rem; color:#555;">Foco em queima de gordura e cardio.</p>
+        </div>
+        <div class="quiz-option" onclick="setGoal('mestre', 'mente')">
+            <h4>FOCO ABSOLUTO</h4>
+            <p style="font-size:0.7rem; color:#555;">Foco em produtividade e estudo.</p>
+        </div>
+        <input type="text" id="p-name-in" placeholder="SEU NOME" style="background:#000; border:1px solid #222; padding:20px; color:white; border-radius:12px; margin-top:20px; width:100%; font-family:'Orbitron';">
     </div>
 
-    <div id="scr-status" class="screen active-screen">
-        <header>
-            <div class="rank-title" id="pRank">RANK E</div>
-            <div class="player-name" id="pName">---</div>
-        </header>
-        <div class="stat-card">
-            <div style="display:flex; justify-content:space-between; font-family:'Orbitron'; font-size:0.7rem;">
-                <span id="pLvl">LV. 01</span>
-                <span id="pXpTxt">0 / 100 XP</span>
+    <div id="scr-dash" class="screen">
+        <div class="hud-header">
+            <div>
+                <div class="hud-rank" id="p-rank">RANK E</div>
+                <div class="hud-name" id="p-name-out">---</div>
             </div>
-            <div class="xp-bar-wrap"><div class="xp-fill" id="xpBar"></div></div>
-            <div style="font-size: 0.6rem; color: #555; text-align: center;">XP TOTAL ACUMULADO: <span id="xpTotal">0</span></div>
+            <div style="text-align:right;">
+                <div style="font-size:0.5rem; color:#444;">CREDITOS</div>
+                <div style="font-family:'Orbitron'; color:var(--gold); font-size:1.2rem;" id="p-gold">0</div>
+            </div>
         </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-            <div class="stat-card"><div style="font-size:0.6rem; color:#666;">FORÇA</div><div id="pStr" style="font-family:'Orbitron'; font-size:1.5rem;">10.0</div></div>
-            <div class="stat-card"><div style="font-size:0.6rem; color:#666;">OURO</div><div id="pGold" style="font-family:'Orbitron'; font-size:1.5rem; color:var(--gold);">0</div></div>
+
+        <div class="xp-card">
+            <div style="display:flex; justify-content:space-between; font-family:'Orbitron'; font-size:0.6rem;">
+                <span id="p-lvl">LV. 01</span>
+                <span id="p-xp-txt">0 / 100 XP</span>
+            </div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-fill"></div></div>
         </div>
-        <div class="stat-card" style="border-left-color: var(--purple);">
-            <div style="font-size:0.6rem; color:#666;">INVENTÁRIO ATIVO</div>
-            <div id="inv-list" style="margin-top:10px; font-size:0.8rem; color:var(--purple);">Nenhum item de proteção...</div>
-        </div>
+
+        <div id="m-list"></div>
     </div>
 
-    <div id="scr-missions" class="screen">
-        <header><div class="rank-title">QUEST LOG</div><div class="player-name">MISSÕES</div></header>
-        <div id="mission-list"></div>
+    <div class="tab-bar" id="tab-bar" style="display:none;">
+        <div class="tab-item active">DASHBOARD</div>
+        <div class="tab-item">LOJA</div>
+        <div class="tab-item">SISTEMA</div>
     </div>
-
-    <div id="scr-shop" class="screen">
-        <header><div class="rank-title">SYSTEM MARKET</div><div class="player-name">LOJA</div></header>
-        <div class="shop-item">
-            <div><div style="color:var(--gold); font-weight:bold;">PERGAMINHO DE PROTEÇÃO</div><div style="font-size:0.6rem; color:#888;">Impede perda de nível ao falhar no dia.</div></div>
-            <button class="btn-action" style="border-color:var(--gold); color:var(--gold);" onclick="buyItem('shield', 1000)">1000G</button>
-        </div>
-        <div class="shop-item">
-            <div><div style="color:var(--neon); font-weight:bold;">POÇÃO DE FADIGA</div><div style="font-size:0.6rem; color:#888;">Recupera 100 XP instantaneamente.</div></div>
-            <button class="btn-action" onclick="buyItem('xp', 500)">500G</button>
-        </div>
-    </div>
-
-    <nav>
-        <div class="nav-item active" onclick="tab('scr-status', this)">STATUS</div>
-        <div class="nav-item" onclick="tab('scr-missions', this)">MISSÕES</div>
-        <div class="nav-item" onclick="tab('scr-shop', this)">LOJA</div>
-    </nav>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('APEX_SUPREME')) || null;
+        let db = JSON.parse(localStorage.getItem('NEXUS_DATA')) || null;
 
-        function init() {
-            const n = document.getElementById('nIn').value;
-            if(!n) return;
-            db = { name: n, xp: 0, gold: 0, str: 10, inv: { shield: 0 }, done: [], last: new Date().toLocaleDateString() };
+        function setGoal(id, path) {
+            const name = document.getElementById('p-name-in').value;
+            if(!name) return alert("Identifique-se primeiro.");
+            db = { name: name, goal: path, xp: 0, gold: 0, done: [], last: new Date().toLocaleDateString() };
             save(); render();
         }
 
-        function save() { localStorage.setItem('APEX_SUPREME', JSON.stringify(db)); }
-
-        function tab(id, el) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active-screen');
-            el.classList.add('active');
-        }
-
-        function getProg(xp) {
-            let l = 1, totalNeeded = 100;
-            while(xp >= totalNeeded) { l++; totalNeeded += (l * 100); }
-            const colors = { 0:'#00d4ff', 10:'#00ff88', 20:'#ffd700', 30:'#ff8800', 40:'#bc13fe', 50:'#ff0044' };
-            let color = colors[0];
-            Object.keys(colors).forEach(lvl => { if(l >= lvl) color = colors[lvl]; });
-            return { l, nextGoal: totalNeeded, color, rank: l < 10 ? 'E' : l < 20 ? 'D' : l < 30 ? 'C' : l < 40 ? 'B' : l < 50 ? 'A' : 'S' };
-        }
+        function save() { localStorage.setItem('NEXUS_DATA', JSON.stringify(db)); }
 
         function render() {
-            if(!db) { document.getElementById('setup-overlay').style.display = 'flex'; return; }
-            document.getElementById('setup-overlay').style.display = 'none';
+            if(!db) return;
+            document.getElementById('scr-quiz').classList.remove('active');
+            document.getElementById('scr-dash').classList.add('active');
+            document.getElementById('tab-bar').style.display = 'flex';
 
-            const p = getProg(db.xp);
-            document.documentElement.style.setProperty('--accent', p.color);
-            document.getElementById('pName').innerText = db.name.toUpperCase();
-            document.getElementById('pRank').innerText = `RANK ${p.rank}`;
-            document.getElementById('pLvl').innerText = `LV. ${p.l}`;
-            document.getElementById('pXpTxt').innerText = `${Math.floor(db.xp)} / ${p.nextGoal} XP`;
-            document.getElementById('xpTotal').innerText = db.xp;
-            document.getElementById('xpBar').style.width = (db.xp / p.nextGoal * 100) + "%";
-            document.getElementById('pGold').innerText = db.gold;
-            document.getElementById('pStr').innerText = db.str.toFixed(1);
-            document.getElementById('inv-list').innerText = db.inv.shield > 0 ? `🛡️ ${db.inv.shield}x Proteção Ativa` : "Nenhum item...";
+            const lvl = Math.floor(db.xp / 100) + 1;
+            const xpInLvl = db.xp % 100;
+            
+            document.getElementById('p-name-out').innerText = db.name;
+            document.getElementById('p-lvl').innerText = `LV. ${lvl}`;
+            document.getElementById('p-gold').innerText = db.gold;
+            document.getElementById('p-xp-txt').innerText = `${xpInLvl} / 100 XP`;
+            document.getElementById('xp-fill').style.width = xpInLvl + "%";
+            document.getElementById('p-rank').innerText = lvl < 10 ? "RANK E" : "RANK D";
 
-            const mList = document.getElementById('mission-list');
-            mList.innerHTML = "";
-            const quests = [{id:1, t:'FISICO', d:'20m de Treino', xp:40}, {id:2, t:'MENTAL', d:'30m de Estudo', xp:40}, {id:3, t:'DIETA', d:'Bater meta calórica', xp:20}];
-            quests.filter(q => !db.done.includes(q.id)).forEach(q => {
-                mList.innerHTML += `<div class="mission-item"><div><h4>${q.t}</h4><p>${q.d}</p></div><button class="btn-action" onclick="comp(${q.id}, ${q.xp})">OK</button></div>`;
+            const mList = document.getElementById('m-list');
+            mList.innerHTML = `<h3 style="font-family:'Orbitron'; font-size:0.7rem; color:#444; margin-bottom:15px;">DIRETRIZES DIÁRIAS</h3>`;
+            
+            const quests = [
+                {t: 'OBJETIVO ' + db.goal.toUpperCase(), xp: 50},
+                {t: 'VITALIDADE', xp: 25},
+                {t: 'DISCIPLINA', xp: 25}
+            ];
+
+            quests.forEach((q, i) => {
+                if(!db.done.includes(i)) {
+                    mList.innerHTML += `
+                    <div class="mission-card">
+                        <span style="font-family:'Orbitron'; font-size:0.75rem;">${q.t}</span>
+                        <button class="btn-nexus" onclick="complete(${i}, ${q.xp})">COMPLETAR</button>
+                    </div>`;
+                }
             });
         }
 
-        function comp(id, xp) {
-            db.xp += xp; db.gold += 150; db.done.push(id);
+        function complete(id, xp) {
+            db.xp += xp; db.gold += 100; db.done.push(id);
             save(); render();
         }
 
-        function buyItem(type, cost) {
-            if(db.gold >= cost) {
-                db.gold -= cost;
-                if(type === 'shield') db.inv.shield++;
-                if(type === 'xp') db.xp += 100;
-                save(); render();
-                alert("ITEM ADQUIRIDO!");
-            } else alert("OURO INSUFICIENTE!");
-        }
-
-        window.onload = () => {
-            if(db && db.last !== new Date().toLocaleDateString()) {
-                if(db.done.length < 3 && db.inv.shield === 0) db.xp = Math.max(0, db.xp - 200);
-                else if(db.inv.shield > 0 && db.done.length < 3) db.inv.shield--;
-                db.done = []; db.last = new Date().toLocaleDateString(); save();
-            }
-            render();
-        };
+        window.onload = render;
     </script>
 </body>
 </html>
