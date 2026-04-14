@@ -1,181 +1,64 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS GENESIS | APEX INTERFACE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #00f2ff; --secondary: #7000ff; --danger: #ff0044;
-            --bg: #030305; --surface: rgba(15, 15, 20, 0.9);
-            --gold: #ffd700; --glass: rgba(255, 255, 255, 0.03);
+<script>
+    const terminal = document.getElementById('terminal');
+
+    function log(msg) {
+        const time = new Date().toLocaleTimeString();
+        terminal.innerHTML += `<br>[${time}] ${msg}`;
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function addCommand(label, action) {
+        const grid = document.getElementById('command-grid');
+        const btn = document.createElement('button');
+        btn.className = 'nexus-btn';
+        btn.innerText = label;
+        btn.onclick = () => {
+            log(`EXECUTANDO: ${label}`);
+            action();
+        };
+        grid.appendChild(btn);
+    }
+
+    // --- COMANDOS CONFIGURADOS POR MIM (NEXUS CORE) ---
+
+    // 1. MULTI-SEARCH (Abre pesquisas em série)
+    addCommand("Pesquisa Global", () => {
+        const termo = prompt("O que deseja buscar em múltiplas fontes?");
+        if(termo) {
+            window.open(`https://www.google.com/search?q=${termo}`, '_blank');
+            log(`Busca iniciada para: ${termo}`);
         }
+    });
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; }
-
-        /* Background Estilo Nexus */
-        .nexus-core { position: fixed; inset: 0; background: radial-gradient(circle at 50% 120%, var(--secondary), transparent 80%), radial-gradient(circle at 0% 0%, #111, #000); z-index: -1; opacity: 0.5; }
-        
-        /* Sistema de Abas */
-        .view { position: fixed; inset: 0; display: none; flex-direction: column; padding: 25px; padding-bottom: 100px; overflow-y: auto; z-index: 10; }
-        .active-view { display: flex; animation: viewTransition 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes viewTransition { from { opacity: 0; filter: blur(10px); transform: scale(1.05); } to { opacity: 1; filter: blur(0); transform: scale(1); } }
-
-        /* UI de Elite */
-        header { margin-bottom: 25px; border-left: 3px solid var(--primary); padding-left: 15px; }
-        .rank-id { font-family: 'Orbitron'; font-size: 0.6rem; letter-spacing: 3px; color: var(--primary); opacity: 0.8; }
-        .player-id { font-family: 'Orbitron'; font-size: 1.6rem; font-weight: 900; text-transform: uppercase; }
-
-        /* Cards de Alta Performance */
-        .glass-panel { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-radius: 16px; padding: 20px; margin-bottom: 15px; position: relative; }
-        .progress-container { background: rgba(0,0,0,0.5); height: 6px; border-radius: 10px; margin: 15px 0; overflow: hidden; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: 1.5s ease-out; box-shadow: 0 0 15px var(--primary); }
-
-        .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        .stat-mini { background: var(--glass); border: 1px solid rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; text-align: center; }
-        .stat-mini label { font-size: 0.5rem; color: #555; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-mini div { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 700; color: #eee; }
-
-        /* Menu de Navegação Premium */
-        nav { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; height: 70px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-btn { color: #444; font-family: 'Orbitron'; font-size: 0.55rem; text-align: center; cursor: pointer; transition: 0.3s; }
-        .nav-btn.active { color: var(--primary); transform: translateY(-3px); text-shadow: 0 0 10px var(--primary); }
-
-        /* Missões */
-        .quest-item { background: var(--glass); border-left: 3px solid var(--primary); padding: 18px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-check { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 4px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; }
-        .btn-check:active { background: var(--primary); color: #000; }
-
-        /* Onboarding */
-        #onboarding { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; flex-direction: column; justify-content: center; padding: 40px; }
-        input { width: 100%; background: #0d0d12; border: 1px solid #1a1a25; padding: 18px; color: #fff; border-radius: 12px; margin-bottom: 12px; font-family: 'Orbitron'; font-size: 0.8rem; }
-    </style>
-</head>
-<body>
-
-    <div class="nexus-core"></div>
-
-    <div id="onboarding">
-        <h1 style="font-family:'Orbitron'; color:var(--primary); text-align:center; margin-bottom:40px; letter-spacing:8px;">GENESIS</h1>
-        <input type="text" id="nIn" placeholder="IDENTIFICAÇÃO">
-        <input type="number" id="hIn" placeholder="ALTURA (cm)">
-        <input type="number" id="wIn" placeholder="PESO (kg)">
-        <button class="btn-check" style="width:100%; padding:20px; font-size:0.8rem;" onclick="bootSystem()">VINCULAR AO SISTEMA</button>
-    </div>
-
-    <div id="scr-status" class="view">
-        <header>
-            <div class="rank-id" id="pRank">RANK E</div>
-            <div class="player-id" id="pName">---</div>
-        </header>
-        <div class="glass-panel">
-            <div style="display:flex; justify-content:space-between; font-family:'Orbitron'; font-size:0.6rem;">
-                <span id="pLvl">LEVEL 01</span>
-                <span id="pXp">0 / 100 XP</span>
-            </div>
-            <div class="progress-container"><div class="progress-bar" id="xpBar"></div></div>
-            <div style="text-align:center; font-size:0.5rem; color:#444; letter-spacing:2px;">MONITORAMENTO DE BIOMETRIA ATIVO</div>
-        </div>
-        <div class="stat-row">
-            <div class="stat-mini"><label>Força</label><div id="pStr">10</div></div>
-            <div class="stat-mini"><label>Ouro</label><div id="pGold" style="color:var(--gold);">0</div></div>
-        </div>
-        <div class="glass-panel" style="border-bottom: 2px solid var(--primary);">
-            <div style="font-size:0.6rem; color:#555; margin-bottom:10px;">ANÁLISE DE SAÚDE</div>
-            <div style="font-size:0.8rem;" id="pImc">Aguardando dados...</div>
-        </div>
-    </div>
-
-    <div id="scr-quests" class="view">
-        <header><div class="rank-id">DIRETRIZES</div><div class="player-id">MISSÕES</div></header>
-        <div id="qList"></div>
-    </div>
-
-    <div id="scr-market" class="view">
-        <header><div class="rank-id">SISTEMA</div><div class="player-id">LOJA</div></header>
-        <div class="glass-panel" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><div style="color:var(--gold); font-weight:bold;">POÇÃO DE FADIGA</div><div style="font-size:0.6rem; color:#555;">Recupera 50 XP instantaneamente.</div></div>
-            <button class="btn-check" onclick="buyItem(500)">500G</button>
-        </div>
-    </div>
-
-    <nav id="nav-bar" style="display:none;">
-        <div class="nav-btn active" onclick="tab('scr-status', this)">STATUS</div>
-        <div class="nav-btn" onclick="tab('scr-quests', this)">TREINO</div>
-        <div class="nav-btn" onclick="tab('scr-market', this)">LOJA</div>
-    </nav>
-
-    <script>
-        let db = JSON.parse(localStorage.getItem('NEXUS_APEX_DATA')) || null;
-
-        function bootSystem() {
-            const n = document.getElementById('nIn').value;
-            const h = parseFloat(document.getElementById('hIn').value);
-            const w = parseFloat(document.getElementById('wIn').value);
-            if(!n || !h || !w) return;
-            const imc = (w / ((h/100)**2)).toFixed(1);
-            db = { name: n, h, w, imc, xp: 0, gold: 0, str: 10, done: [], last: new Date().toLocaleDateString() };
-            save(); render();
+    // 2. TEXT TRANSFORM (Limpeza de formatação para colagem)
+    addCommand("Limpar Texto", async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            const cleanText = text.replace(/\s+/g, ' ').trim();
+            await navigator.clipboard.writeText(cleanText);
+            log("Clipboard limpo e normalizado.");
+        } catch (err) {
+            log("Erro: Necessário permissão de Clipboard.");
         }
+    });
 
-        function save() { localStorage.setItem('NEXUS_APEX_DATA', JSON.stringify(db)); }
+    // 3. WORKSPACE (Abre suas ferramentas de uma vez)
+    addCommand("Abrir Workspace", () => {
+        // Exemplo de links profissionais - pode ser alterado
+        const links = ['https://gmail.com', 'https://web.whatsapp.com'];
+        links.forEach(link => window.open(link, '_blank'));
+        log("Ferramentas de trabalho abertas.");
+    });
 
-        function tab(id, el) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active-view');
-            el.classList.add('active');
-        }
-
-        function getLvl(xp) {
-            let lvl = 1, total = 100;
-            while(xp >= total) { lvl++; total += (lvl * 100); }
-            return { lvl, goal: total, rank: lvl < 10 ? 'E' : lvl < 20 ? 'D' : lvl < 30 ? 'C' : 'B' };
-        }
-
-        function render() {
-            if(!db) return;
-            document.getElementById('onboarding').style.display = 'none';
-            document.getElementById('nav-bar').style.display = 'flex';
-            document.getElementById('scr-status').classList.add('active-view');
-
-            const p = getLvl(db.xp);
-            document.getElementById('pName').innerText = db.name;
-            document.getElementById('pRank').innerText = `RANK ${p.rank}`;
-            document.getElementById('pLvl').innerText = `LEVEL ${p.lvl}`;
-            document.getElementById('pXp').innerText = `${db.xp} / ${p.goal} XP`;
-            document.getElementById('xpBar').style.width = (db.xp / p.goal * 100) + "%";
-            document.getElementById('pGold').innerText = db.gold;
-            document.getElementById('pStr').innerText = db.str;
-            document.getElementById('pImc').innerText = `IMC: ${db.imc} | Condição: ${db.imc < 25 ? 'Normal' : 'Atenção'}`;
-
-            const qList = document.getElementById('qList');
-            qList.innerHTML = "";
-            const quests = [{id:1, t:'TREINO FISICO', xp:40}, {id:2, t:'ESTUDO FOCADO', xp:40}, {id:3, t:'HIDRATAÇÃO', xp:20}];
-            quests.filter(q => !db.done.includes(q.id)).forEach(q => {
-                qList.innerHTML += `<div class="quest-item"><div><div style="font-size:0.8rem; font-weight:bold;">${q.t}</div></div><button class="btn-check" onclick="comp(${q.id}, ${q.xp})">COMPLETAR</button></div>`;
+    // 4. SYSTEM INFO (Diagnóstico do Dispositivo)
+    addCommand("Status Sistema", () => {
+        const info = `Resolução: ${window.innerWidth}x${window.innerHeight} | Bateria: Verificando...`;
+        log(info);
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(batt => {
+                log(`Bateria: ${Math.round(batt.level * 100)}% - ${batt.charging ? 'Carregando' : 'Descarregando'}`);
             });
         }
+    });
 
-        function comp(id, xp) {
-            db.xp += xp; db.gold += 150; db.done.push(id);
-            save(); render();
-        }
-
-        function buyItem(cost) {
-            if(db.gold >= cost) { db.gold -= cost; db.xp += 50; save(); render(); }
-            else alert("Créditos insuficientes.");
-        }
-
-        window.onload = () => {
-            if(db && db.last !== new Date().toLocaleDateString()) {
-                if(db.done.length < 3) db.xp = Math.max(0, db.xp - 200);
-                db.done = []; db.last = new Date().toLocaleDateString(); save();
-            }
-            render();
-        };
-    </script>
-</body>
-</html>
+</script>
