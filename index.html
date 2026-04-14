@@ -3,239 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>SOLO LEVELING: APEX PRO</title>
+    <title>SOLO LEVELING: APEX SUPREME</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon: #00d4ff; --bg: #030305; --card: rgba(15, 15, 25, 0.7);
-            --gold: #ffd700; --red: #ff0044; --green: #00ff88;
-            --accent: var(--neon); --glare: rgba(255, 255, 255, 0.05);
+            --neon: #00d4ff; --bg: #020204; --card: rgba(20, 20, 30, 0.6);
+            --gold: #ffd700; --red: #ff0044; --green: #00ff88; --purple: #bc13fe;
+            --accent: var(--neon);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body { 
-            background: var(--bg); color: white; height: 100vh; overflow: hidden; 
-            display: flex; flex-direction: column; transition: background 1s ease;
-        }
+        /* Fundo Dinâmico */
+        .aura { position: fixed; inset: 0; background: radial-gradient(circle at 50% -10%, var(--accent), transparent 70%); opacity: 0.15; z-index: -1; transition: 1s; }
 
-        /* Efeito de Fundo Animado */
-        .ambient-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% -20%, var(--accent), transparent 60%);
-            opacity: 0.15; z-index: -1; filter: blur(100px); animation: pulseBg 8s infinite alternate;
+        /* Navegação Inferior (Abas) */
+        nav { 
+            position: fixed; bottom: 0; width: 100%; background: rgba(10, 10, 15, 0.95); 
+            display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000;
+            backdrop-filter: blur(10px);
         }
-        @keyframes pulseBg { from { opacity: 0.1; } to { opacity: 0.25; } }
+        .nav-item { color: #555; font-family: 'Orbitron'; font-size: 0.6rem; text-align: center; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--accent); transform: translateY(-5px); text-shadow: 0 0 10px var(--accent); }
 
-        .app-shell { flex: 1; display: flex; flex-direction: column; padding: 25px; z-index: 10; overflow-y: auto; }
+        /* Telas */
+        .screen { flex: 1; display: none; flex-direction: column; padding: 25px; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.4s ease; }
+        .active-screen { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* HUD Premium */
-        header { 
-            display: flex; justify-content: space-between; align-items: flex-end;
-            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 25px;
-        }
-        .player-info h1 { font-family: 'Orbitron'; font-weight: 900; font-size: 1.6rem; letter-spacing: -1px; text-transform: uppercase; }
-        .rank-badge { 
-            font-family: 'Orbitron'; font-size: 0.7rem; font-weight: 700; 
-            color: var(--accent); border: 1px solid var(--accent); padding: 3px 10px; border-radius: 100px;
-            box-shadow: 0 0 15px var(--accent); text-shadow: 0 0 5px var(--accent);
-        }
+        /* Elementos Premium */
+        header { margin-bottom: 30px; border-left: 4px solid var(--accent); padding-left: 15px; }
+        .rank-title { font-family: 'Orbitron'; font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; }
+        .player-name { font-family: 'Orbitron'; font-size: 1.8rem; font-weight: 900; text-transform: uppercase; }
 
-        /* Barra de XP Infinita */
-        .xp-section { margin-bottom: 30px; }
-        .xp-meta { display: flex; justify-content: space-between; margin-bottom: 8px; font-family: 'Orbitron'; font-size: 0.65rem; color: #aaa; }
-        .progress-track { 
-            background: rgba(255,255,255,0.03); height: 6px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
-        }
-        .progress-fill { 
-            height: 100%; background: linear-gradient(90deg, var(--accent), #fff); 
-            width: 0%; transition: 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 20px var(--accent);
-        }
+        .stat-card { background: var(--card); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .stat-card::before { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: var(--accent); }
 
-        /* Grid de Status Minimalista */
-        .stats-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
-        .stat-box { 
-            background: var(--card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glare); padding: 15px; border-radius: 12px; position: relative;
-        }
-        .stat-box label { font-size: 0.6rem; color: #666; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-        .stat-box span { display: block; font-family: 'Orbitron'; font-size: 1.4rem; margin-top: 5px; font-weight: 700; }
-        .ap-dot { 
-            position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; 
-            background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); display: none;
-        }
+        .xp-bar-wrap { background: rgba(255,255,255,0.03); height: 8px; border-radius: 10px; margin: 15px 0; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #fff); width: 0%; transition: 1s cubic-bezier(0.1, 0.9, 0.2, 1); box-shadow: 0 0 15px var(--accent); }
 
-        /* Missões Modernas */
-        .missions-title { font-family: 'Orbitron'; font-size: 0.75rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .missions-title::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+        .mission-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-action { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 18px; font-family: 'Orbitron'; font-size: 0.6rem; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .btn-action:active { background: var(--accent); color: #000; }
 
-        .mission-item { 
-            background: var(--card); border: 1px solid var(--glare); padding: 18px; 
-            border-radius: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
-            transition: 0.3s;
-        }
-        .m-text h4 { font-size: 0.9rem; margin-bottom: 4px; color: #fff; }
-        .m-text p { font-size: 0.75rem; color: #666; }
-
-        .btn-check { 
-            width: 45px; height: 45px; border-radius: 12px; border: 1px solid var(--accent); 
-            background: transparent; color: var(--accent); font-weight: bold; cursor: pointer;
-            transition: 0.3s; font-size: 0.6rem;
-        }
-        .btn-check:active { background: var(--accent); color: #000; transform: scale(0.9); }
-
-        /* Setup Overlay */
-        #setup-overlay { 
-            position: fixed; inset: 0; background: var(--bg); z-index: 1000; 
-            display: none; flex-direction: column; justify-content: center; padding: 40px; 
-        }
-        input { 
-            background: #0d0d12; border: 1px solid #1a1a25; padding: 18px; color: #fff; 
-            border-radius: 12px; margin-bottom: 12px; font-family: 'Orbitron'; font-size: 0.8rem;
-        }
-        input:focus { border-color: var(--neon); outline: none; }
+        /* Loja de Itens */
+        .shop-item { background: linear-gradient(135deg, rgba(255,215,0,0.1), transparent); border: 1px solid rgba(255,215,0,0.2); padding: 20px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        
+        #setup-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; justify-content: center; padding: 40px; }
+        .input-premium { background: #0d0d12; border: 1px solid #222; padding: 20px; color: #fff; border-radius: 10px; margin-bottom: 15px; font-family: 'Orbitron'; width: 100%; }
     </style>
 </head>
 <body>
 
-    <div class="ambient-bg" id="amb"></div>
+    <div class="aura" id="aura"></div>
 
     <div id="setup-overlay">
-        <h2 style="font-family:'Orbitron'; color:var(--neon); margin-bottom:40px; text-align:center;">SYSTEM DESPERTAR</h2>
-        <input type="text" id="setup-name" placeholder="NOME DO JOGADOR">
-        <input type="number" id="setup-h" placeholder="ALTURA (cm)">
-        <input type="number" id="setup-w" placeholder="PESO (kg)">
-        <button class="btn-check" style="width:100%; height:60px;" onclick="startSystem()">INICIAR CONTRATO</button>
+        <h1 style="font-family:'Orbitron'; color:var(--neon); text-align:center; margin-bottom:40px; letter-spacing:10px;">DESPERTAR</h1>
+        <input type="text" id="nIn" class="input-premium" placeholder="NOME DO CAÇADOR">
+        <button class="btn-action" style="width:100%; padding:20px;" onclick="init()">VINCULAR ALMA</button>
     </div>
 
-    <div class="app-shell">
+    <div id="scr-status" class="screen active-screen">
         <header>
-            <div class="player-info">
-                <span class="rank-tag" id="r-tag">RANK E</span>
-                <h1 id="p-name">---</h1>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 0.5rem; color: #555;">OURO ACUMULADO</div>
-                <div style="font-family:'Orbitron'; color:var(--gold); font-size: 1.2rem;" id="p-gold">0</div>
-            </div>
+            <div class="rank-title" id="pRank">RANK E</div>
+            <div class="player-name" id="pName">---</div>
         </header>
-
-        <div class="xp-section">
-            <div class="xp-meta">
-                <span id="p-lvl">LEVEL 1</span>
-                <span id="p-xp-info">0 / 100 XP TOTAL</span>
+        <div class="stat-card">
+            <div style="display:flex; justify-content:space-between; font-family:'Orbitron'; font-size:0.7rem;">
+                <span id="pLvl">LV. 01</span>
+                <span id="pXpTxt">0 / 100 XP</span>
             </div>
-            <div class="progress-track">
-                <div class="progress-fill" id="xp-bar"></div>
-            </div>
+            <div class="xp-bar-wrap"><div class="xp-fill" id="xpBar"></div></div>
+            <div style="font-size: 0.6rem; color: #555; text-align: center;">XP TOTAL ACUMULADO: <span id="xpTotal">0</span></div>
         </div>
-
-        <div class="stats-container">
-            <div class="stat-box" onclick="levelStat('str')">
-                <div class="ap-dot" id="ap-str"></div>
-                <label>Fisicalidade</label>
-                <span id="s-str">10.0</span>
-            </div>
-            <div class="stat-box" onclick="levelStat('int')">
-                <div class="ap-dot" id="ap-int"></div>
-                <label>Cognição</label>
-                <span id="s-int">10.0</span>
-            </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div class="stat-card"><div style="font-size:0.6rem; color:#666;">FORÇA</div><div id="pStr" style="font-family:'Orbitron'; font-size:1.5rem;">10.0</div></div>
+            <div class="stat-card"><div style="font-size:0.6rem; color:#666;">OURO</div><div id="pGold" style="font-family:'Orbitron'; font-size:1.5rem; color:var(--gold);">0</div></div>
         </div>
-
-        <div class="missions-title">OBJETIVOS DIÁRIOS</div>
-        <div id="m-list" style="flex:1;"></div>
-
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-check" style="flex:1; height:50px; border-color:#222; color:#444;" onclick="hardReset()">RESET</button>
-            <button class="btn-action" style="flex:2; height:50px; background:var(--accent); color:black; border:none; border-radius:12px; font-family:'Orbitron'; font-size:0.7rem; font-weight:900;" onclick="alert('Dungeon System: Conclua as missões para liberar portais.')">EXPLORAR DUNGEON</button>
+        <div class="stat-card" style="border-left-color: var(--purple);">
+            <div style="font-size:0.6rem; color:#666;">INVENTÁRIO ATIVO</div>
+            <div id="inv-list" style="margin-top:10px; font-size:0.8rem; color:var(--purple);">Nenhum item de proteção...</div>
         </div>
     </div>
+
+    <div id="scr-missions" class="screen">
+        <header><div class="rank-title">QUEST LOG</div><div class="player-name">MISSÕES</div></header>
+        <div id="mission-list"></div>
+    </div>
+
+    <div id="scr-shop" class="screen">
+        <header><div class="rank-title">SYSTEM MARKET</div><div class="player-name">LOJA</div></header>
+        <div class="shop-item">
+            <div><div style="color:var(--gold); font-weight:bold;">PERGAMINHO DE PROTEÇÃO</div><div style="font-size:0.6rem; color:#888;">Impede perda de nível ao falhar no dia.</div></div>
+            <button class="btn-action" style="border-color:var(--gold); color:var(--gold);" onclick="buyItem('shield', 1000)">1000G</button>
+        </div>
+        <div class="shop-item">
+            <div><div style="color:var(--neon); font-weight:bold;">POÇÃO DE FADIGA</div><div style="font-size:0.6rem; color:#888;">Recupera 100 XP instantaneamente.</div></div>
+            <button class="btn-action" onclick="buyItem('xp', 500)">500G</button>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-item active" onclick="tab('scr-status', this)">STATUS</div>
+        <div class="nav-item" onclick="tab('scr-missions', this)">MISSÕES</div>
+        <div class="nav-item" onclick="tab('scr-shop', this)">LOJA</div>
+    </nav>
 
     <script>
-        let player = JSON.parse(localStorage.getItem('SL_APEX_PRO')) || null;
+        let db = JSON.parse(localStorage.getItem('APEX_SUPREME')) || null;
 
-        const QUESTS = [
-            { id: 1, t: 'Treino de Força', d: '20 min de exercício intenso', xp: 40 },
-            { id: 2, t: 'Estudo Focado', d: '30 min de leitura ou curso', xp: 40 },
-            { id: 3, t: 'Vitalidade', d: 'Hidratação e Alimentação Limpa', xp: 20 }
-        ];
-
-        function startSystem() {
-            const n = document.getElementById('setup-name').value;
-            const h = document.getElementById('setup-h').value;
-            const w = document.getElementById('setup-w').value;
-            if(!n || !h || !w) return;
-
-            player = {
-                name: n, xp: 0, gold: 0, str: 10, int: 10, ap: 0,
-                done: [], last: new Date().toLocaleDateString()
-            };
+        function init() {
+            const n = document.getElementById('nIn').value;
+            if(!n) return;
+            db = { name: n, xp: 0, gold: 0, str: 10, inv: { shield: 0 }, done: [], last: new Date().toLocaleDateString() };
             save(); render();
+        }
+
+        function save() { localStorage.setItem('APEX_SUPREME', JSON.stringify(db)); }
+
+        function tab(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active-screen');
+            el.classList.add('active');
         }
 
         function getProg(xp) {
-            let l = 1, next = 100, total = 100;
-            while(xp >= total) { l++; next = l * 100; total += next; }
-            const colors = { 0:'#00d4ff', 10:'#00ff88', 20:'#ffd700', 30:'#ff8800', 40:'#a333ff', 50:'#ff0044' };
-            let activeColor = colors[0];
-            Object.keys(colors).forEach(lvl => { if(l >= lvl) activeColor = colors[lvl]; });
-            let rank = l < 10 ? 'E' : l < 20 ? 'D' : l < 30 ? 'C' : l < 40 ? 'B' : l < 50 ? 'A' : 'S';
-            return { l, totalGoal: total, color: activeColor, rank: `RANK ${rank}` };
-        }
-
-        function save() { localStorage.setItem('SL_APEX_PRO', JSON.stringify(player)); }
-
-        function complete(id, xp) {
-            const oldL = getProg(player.xp).l;
-            player.xp += xp; player.gold += 150; player.done.push(id);
-            const newL = getProg(player.xp).l;
-            if(newL > oldL) player.ap += (newL - oldL) * 3;
-            save(); render();
-        }
-
-        function levelStat(type) {
-            if(player.ap > 0) { player.ap--; player[type] += 1; save(); render(); }
+            let l = 1, totalNeeded = 100;
+            while(xp >= totalNeeded) { l++; totalNeeded += (l * 100); }
+            const colors = { 0:'#00d4ff', 10:'#00ff88', 20:'#ffd700', 30:'#ff8800', 40:'#bc13fe', 50:'#ff0044' };
+            let color = colors[0];
+            Object.keys(colors).forEach(lvl => { if(l >= lvl) color = colors[lvl]; });
+            return { l, nextGoal: totalNeeded, color, rank: l < 10 ? 'E' : l < 20 ? 'D' : l < 30 ? 'C' : l < 40 ? 'B' : l < 50 ? 'A' : 'S' };
         }
 
         function render() {
-            if(!player) { document.getElementById('setup-overlay').style.display = 'flex'; return; }
+            if(!db) { document.getElementById('setup-overlay').style.display = 'flex'; return; }
             document.getElementById('setup-overlay').style.display = 'none';
 
-            const p = getProg(player.xp);
+            const p = getProg(db.xp);
             document.documentElement.style.setProperty('--accent', p.color);
-            document.getElementById('p-name').innerText = player.name.toUpperCase();
-            document.getElementById('r-tag').innerText = p.rank;
-            document.getElementById('p-lvl').innerText = `LEVEL ${p.l}`;
-            document.getElementById('p-xp-info').innerText = `${Math.floor(player.xp)} / ${p.totalGoal} XP TOTAL`;
-            document.getElementById('xp-bar').style.width = (player.xp / p.totalGoal * 100) + "%";
-            document.getElementById('p-gold').innerText = player.gold;
-            document.getElementById('s-str').innerText = player.str.toFixed(1);
-            document.getElementById('s-int').innerText = player.int.toFixed(1);
+            document.getElementById('pName').innerText = db.name.toUpperCase();
+            document.getElementById('pRank').innerText = `RANK ${p.rank}`;
+            document.getElementById('pLvl').innerText = `LV. ${p.l}`;
+            document.getElementById('pXpTxt').innerText = `${Math.floor(db.xp)} / ${p.nextGoal} XP`;
+            document.getElementById('xpTotal').innerText = db.xp;
+            document.getElementById('xpBar').style.width = (db.xp / p.nextGoal * 100) + "%";
+            document.getElementById('pGold').innerText = db.gold;
+            document.getElementById('pStr').innerText = db.str.toFixed(1);
+            document.getElementById('inv-list').innerText = db.inv.shield > 0 ? `🛡️ ${db.inv.shield}x Proteção Ativa` : "Nenhum item...";
 
-            document.getElementById('ap-str').style.display = player.ap > 0 ? 'block' : 'none';
-            document.getElementById('ap-int').style.display = player.ap > 0 ? 'block' : 'none';
-
-            const mList = document.getElementById('m-list');
+            const mList = document.getElementById('mission-list');
             mList.innerHTML = "";
-            QUESTS.filter(q => !player.done.includes(q.id)).forEach(q => {
-                mList.innerHTML += `
-                    <div class="mission-item">
-                        <div class="m-text"><h4>${q.t}</h4><p>${q.d}</p></div>
-                        <button class="btn-check" onclick="complete(${q.id}, ${q.xp})">OK</button>
-                    </div>`;
+            const quests = [{id:1, t:'FISICO', d:'20m de Treino', xp:40}, {id:2, t:'MENTAL', d:'30m de Estudo', xp:40}, {id:3, t:'DIETA', d:'Bater meta calórica', xp:20}];
+            quests.filter(q => !db.done.includes(q.id)).forEach(q => {
+                mList.innerHTML += `<div class="mission-item"><div><h4>${q.t}</h4><p>${q.d}</p></div><button class="btn-action" onclick="comp(${q.id}, ${q.xp})">OK</button></div>`;
             });
         }
 
-        function hardReset() { if(confirm("REINICIAR SISTEMA?")) { localStorage.clear(); location.reload(); } }
+        function comp(id, xp) {
+            db.xp += xp; db.gold += 150; db.done.push(id);
+            save(); render();
+        }
+
+        function buyItem(type, cost) {
+            if(db.gold >= cost) {
+                db.gold -= cost;
+                if(type === 'shield') db.inv.shield++;
+                if(type === 'xp') db.xp += 100;
+                save(); render();
+                alert("ITEM ADQUIRIDO!");
+            } else alert("OURO INSUFICIENTE!");
+        }
 
         window.onload = () => {
-            if(player && player.last !== new Date().toLocaleDateString()) {
-                if(player.done.length < QUESTS.length) player.xp = Math.max(0, player.xp - 200);
-                player.done = []; player.last = new Date().toLocaleDateString(); save();
+            if(db && db.last !== new Date().toLocaleDateString()) {
+                if(db.done.length < 3 && db.inv.shield === 0) db.xp = Math.max(0, db.xp - 200);
+                else if(db.inv.shield > 0 && db.done.length < 3) db.inv.shield--;
+                db.done = []; db.last = new Date().toLocaleDateString(); save();
             }
             render();
         };
