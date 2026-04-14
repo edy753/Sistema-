@@ -3,146 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA SOLO LEVELING</title>
+    <meta name="theme-color" content="#050505">
+    <title>SOLO LEVELING: REAL LIFE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00d4ff; --dark: #050505; --panel: rgba(20, 20, 30, 0.9); --purple: #a333ff; --red: #ff0044; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
-        body { background: var(--dark); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        :root { --neon: #00d4ff; --dark: #050505; --panel: rgba(20, 20, 30, 0.9); --purple: #a333ff; --red: #ff0044; --gold: #ffd700; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--dark); color: white; height: 100vh; overflow: hidden; }
         
-        #boot { position: fixed; inset: 0; background: black; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
-        .scanner { width: 120px; height: 120px; border: 3px solid #111; border-top: 3px solid var(--neon); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* Telas */
+        .screen { position: fixed; inset: 0; display: none; flex-direction: column; padding: 20px; transition: 0.5s; overflow-y: auto; }
+        .active { display: flex; }
 
-        #hud { padding: 20px; flex: 1; display: none; flex-direction: column; opacity: 0; transition: 1s; }
-        header { border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; text-shadow: 0 0 10px var(--neon); }
+        /* Setup Inicial */
+        #setup-screen { z-index: 1000; background: var(--dark); justify-content: center; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.7rem; color: var(--neon); font-family: 'Orbitron'; margin-bottom: 5px; }
+        input { width: 100%; background: #111; border: 1px solid #333; color: white; padding: 12px; border-radius: 5px; font-size: 1rem; }
+        input:focus { border-color: var(--neon); outline: none; }
+
+        /* HUD Principal */
+        header { border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; }
+        .xp-container { background: #111; height: 8px; margin: 10px 0; border-radius: 4px; border: 1px solid #333; overflow: hidden; }
+        #xp-bar { background: linear-gradient(90deg, var(--neon), var(--purple)); height: 100%; width: 0%; transition: 0.8s; }
+
+        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        .card { background: var(--panel); border-left: 2px solid var(--neon); padding: 10px; border-radius: 4px; }
+        .card .label { font-size: 0.6rem; color: #888; text-transform: uppercase; }
+        .card .val { font-size: 1.2rem; font-weight: bold; font-family: 'Orbitron'; }
+
+        .analysis-box { background: rgba(0, 212, 255, 0.1); border: 1px solid var(--neon); padding: 10px; border-radius: 5px; font-size: 0.8rem; margin-bottom: 15px; line-height: 1.4; }
+
+        .quest-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn { background: rgba(0, 212, 255, 0.05); border: 1px solid var(--neon); color: var(--neon); padding: 10px; font-family: 'Orbitron'; font-size: 0.7rem; cursor: pointer; border-radius: 3px; }
         
-        .xp-bg { background: #111; height: 6px; margin: 10px 0; border-radius: 3px; border: 1px solid #222; }
-        #xp-bar { background: var(--neon); height: 100%; width: 0%; transition: 0.5s; box-shadow: 0 0 10px var(--neon); }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .card { background: var(--panel); border-left: 3px solid var(--neon); padding: 12px; border-radius: 4px; }
-        .val { font-size: 1.5rem; font-weight: bold; font-family: 'Orbitron'; }
-
-        .quest-box { background: rgba(20, 20, 30, 0.8); border: 1px solid rgba(0, 212, 255, 0.2); padding: 12px; border-radius: 5px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 10px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; }
-
-        /* Estilo da Punição */
-        .penalty-msg { color: var(--red); font-weight: bold; text-shadow: 0 0 5px var(--red); font-size: 0.7rem; display: none; margin-bottom: 10px; }
+        #penalty-alert { background: rgba(255, 0, 68, 0.2); border: 1px solid var(--red); color: var(--red); padding: 10px; margin-bottom: 15px; font-size: 0.8rem; display: none; text-align: center; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
 
-    <div id="boot" onclick="startSystem()">
-        <div class="scanner"></div>
-        <p id="boot-text" style="margin-top:20px; color:var(--neon); font-family:Orbitron; letter-spacing:2px; font-size: 0.7rem;">SISTEMA AGUARDANDO PLAYER...</p>
+    <div id="setup-screen" class="screen">
+        <h2 style="font-family: 'Orbitron'; color: var(--neon); margin-bottom: 20px; text-align: center;">REGISTRO DE DESPERTADO</h2>
+        <div class="input-group">
+            <label>NOME DO JOGADOR</label>
+            <input type="text" id="in-name" placeholder="Ex: Jin-Woo">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group">
+                <label>ALTURA (cm)</label>
+                <input type="number" id="in-height" placeholder="180">
+            </div>
+            <div class="input-group">
+                <label>PESO (kg)</label>
+                <input type="number" id="in-weight" placeholder="75">
+            </div>
+        </div>
+        <button class="btn" onclick="completeSetup()" style="width: 100%; margin-top: 10px; padding: 15px;">INICIAR DESPERTAR</button>
     </div>
 
-    <main id="hud">
-        <div id="penalty-ui" class="penalty-msg">⚠️ AVISO: VOCÊ FALHOU NO TREINO DIÁRIO! XP REDUZIDO.</div>
+    <div id="main-screen" class="screen">
+        <div id="penalty-alert">⚠️ PUNIÇÃO: VOCÊ FALHOU NAS MISSÕES DE ONTEM!</div>
         
         <header>
-            <div style="font-family: 'Orbitron'; font-size: 1rem;">JIN-WOO <span id="lvl-display" style="float:right; color:var(--neon)">LV. 01</span></div>
-            <div id="player-title" style="font-size: 0.6rem; background: rgba(0,212,255,0.1); padding: 2px 5px; display: inline-block; margin-top:5px;">O MAIS FRACO</div>
-            <div class="xp-bg"><div id="xp-bar"></div></div>
-            <div style="font-size:0.6rem; color:#888;">OURO: <span id="gold-val" style="color: gold;">0</span>G</div>
+            <div style="font-family: 'Orbitron'; font-size: 1.1rem;"><span id="display-name">---</span> <span id="lvl-display" style="float:right; color:var(--neon)">LV. 01</span></div>
+            <div id="imc-tag" style="font-size: 0.6rem; color: var(--neon); margin-top: 5px;">ANALISANDO CONDIÇÃO FÍSICA...</div>
+            <div class="xp-container"><div id="xp-bar"></div></div>
         </header>
 
-        <div class="grid">
-            <div class="card"><div style="font-size:0.6rem; color:#888;">FORÇA</div><div class="val" id="str-val">10</div></div>
-            <div class="card"><div style="font-size:0.6rem; color:#888;">INTEL.</div><div class="val" id="int-val">10</div></div>
+        <div class="analysis-box" id="analysis-text">
+            O sistema está calibrando seus dados biométricos para gerar as missões diárias.
         </div>
 
-        <p style="font-family:Orbitron; font-size:0.7rem; margin-bottom:10px; color:var(--neon);">MISSÕES DISPONÍVEIS</p>
-        
-        <div class="quest-box">
-            <div><div style="font-size:0.6rem; color:var(--neon)">QUEST</div><div style="font-size:0.8rem">Fortalecimento</div></div>
-            <button class="btn" onclick="addXP(25, 'str')">+25 XP</button>
+        <div class="status-grid">
+            <div class="card"><div class="label">Força</div><div class="val" id="str-val">10</div></div>
+            <div class="card"><div class="label">Inteligência</div><div class="val" id="int-val">10</div></div>
         </div>
 
-        <div class="quest-box" style="border-color: var(--purple)">
-            <div><div style="font-size:0.6rem; color:var(--purple)">QUEST</div><div style="font-size:0.8rem">Meditação</div></div>
-            <button class="btn" onclick="addXP(30, 'int')" style="border-color:var(--purple); color:var(--purple)">+30 XP</button>
-        </div>
-
-        <div style="margin-top:auto; display:flex; justify-content:space-between; padding-bottom:10px">
-            <button class="btn" style="width:100%" onclick="showInventory()">VER INVENTÁRIO (RECOMPENSAS)</button>
-        </div>
-    </main>
+        <div id="quest-container">
+            </div>
+    </div>
 
     <script>
-        let audioCtx;
-        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        let stats = JSON.parse(localStorage.getItem('sl_data')) || null;
 
-        function playSound(f, t, d) {
-            initAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-            o.connect(g); g.connect(audioCtx.destination); o.type = t;
-            o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d); o.start(); o.stop(audioCtx.currentTime + d);
+        function completeSetup() {
+            const name = document.getElementById('in-name').value;
+            const h = parseFloat(document.getElementById('in-height').value) / 100;
+            const w = parseFloat(document.getElementById('in-weight').value);
+
+            if(!name || !h || !w) return alert("Preencha todos os dados!");
+
+            const imc = (w / (h * h)).toFixed(1);
+            let condicao = "";
+            if(imc < 18.5) condicao = "ABAIXO DO PESO";
+            else if(imc < 25) condicao = "PESO IDEAL";
+            else condicao = "SOBREPESO";
+
+            stats = {
+                name: name, height: h, weight: w, imc: imc, cond: condicao,
+                lvl: 1, xp: 0, str: 10, int: 10, gold: 0,
+                lastQuestDate: new Date().toLocaleDateString(),
+                penaltyActive: false
+            };
+            
+            saveAndRefres();
         }
 
-        // Dados do Sistema
-        let xp = parseInt(localStorage.getItem('sl_xp')) || 0;
-        let lvl = parseInt(localStorage.getItem('sl_lvl')) || 1;
-        let str = parseInt(localStorage.getItem('sl_str')) || 10;
-        let int = parseInt(localStorage.getItem('sl_int')) || 10;
-        let gold = parseInt(localStorage.getItem('sl_gold')) || 0;
-        let lastVisit = localStorage.getItem('sl_last_visit') || Date.now();
+        function saveAndRefres() {
+            localStorage.setItem('sl_data', JSON.stringify(stats));
+            location.reload();
+        }
 
         function checkPenalty() {
-            const now = Date.now();
-            const diff = now - lastVisit;
-            const hours24 = 24 * 60 * 60 * 1000;
-
-            if (diff > hours24) {
-                document.getElementById('penalty-ui').style.display = 'block';
-                xp = Math.max(0, xp - 50); // Punição: perde 50 XP
-                playSound(100, 'sawtooth', 0.5); // Som de erro
+            const hoje = new Date().toLocaleDateString();
+            if (stats.lastQuestDate !== hoje) {
+                stats.penaltyActive = true;
+                stats.xp = Math.max(0, stats.xp - 50);
+                stats.lastQuestDate = hoje; // Reset para hoje
+                localStorage.setItem('sl_data', JSON.stringify(stats));
             }
-            localStorage.setItem('sl_last_visit', now);
         }
 
-        function updateUI() {
-            document.getElementById('lvl-display').innerText = `LV. ${lvl}`;
-            document.getElementById('xp-bar').style.width = xp + "%";
-            document.getElementById('str-val').innerText = str;
-            document.getElementById('int-val').innerText = int;
-            document.getElementById('gold-val').innerText = gold;
+        function init() {
+            if (!stats) {
+                document.getElementById('setup-screen').classList.add('active');
+            } else {
+                checkPenalty();
+                document.getElementById('main-screen').classList.add('active');
+                renderHUD();
+            }
+        }
+
+        function renderHUD() {
+            document.getElementById('display-name').innerText = stats.name.toUpperCase();
+            document.getElementById('lvl-display').innerText = `LV. ${stats.lvl}`;
+            document.getElementById('imc-tag').innerText = `CONDIÇÃO: ${stats.cond}`;
+            document.getElementById('str-val').innerText = stats.str;
+            document.getElementById('int-val').innerText = stats.int;
+            document.getElementById('xp-bar').style.width = (stats.xp % 100) + "%";
             
-            localStorage.setItem('sl_xp', xp); localStorage.setItem('sl_lvl', lvl);
-            localStorage.setItem('sl_str', str); localStorage.setItem('sl_int', int);
-            localStorage.setItem('sl_gold', gold);
+            if(stats.penaltyActive) document.getElementById('penalty-alert').style.display = 'block';
+
+            document.getElementById('analysis-text').innerText = `Seu IMC é ${stats.imc}. O sistema recomenda foco em ${stats.cond === 'SOBREPESO' ? 'Vigor e Exercícios' : 'Fortalecimento Muscular'}.`;
+
+            renderQuests();
+        }
+
+        function renderQuests() {
+            const qBox = document.getElementById('quest-container');
+            qBox.innerHTML = `
+                <p style="font-family:Orbitron; font-size:0.7rem; margin-bottom:10px; color:var(--neon);">MISSÕES DIÁRIAS</p>
+                <div class="quest-box">
+                    <div><div style="font-size:0.6rem; color:var(--neon)">TREINO</div><div style="font-size:0.8rem">10 Minutos de Cardio</div></div>
+                    <button class="btn" onclick="addXP(30, 'str')">CONCLUIR</button>
+                </div>
+            `;
         }
 
         function addXP(amt, type) {
-            playSound(880, 'sine', 0.1);
-            xp += amt;
-            if(type === 'str') str++; else int++;
-            if(xp >= 100) {
-                xp = 0; lvl++; gold += 500; // RECOMPENSA: +500 Gold ao subir nível
-                playSound(440, 'square', 0.5);
-                alert("LEVEL UP! RECOMPENSA: +500G E CHAVE DE BAÚ ADQUIRIDA.");
-            }
-            localStorage.setItem('sl_last_visit', Date.now()); // Reset do tempo de punição
-            updateUI();
+            stats.xp += amt;
+            if(type === 'str') stats.str++;
+            if(stats.xp >= 100) { stats.lvl++; stats.xp = 0; alert("LEVEL UP!"); }
+            stats.penaltyActive = false; // Cumpriu a missão, remove aviso de punição
+            localStorage.setItem('sl_data', JSON.stringify(stats));
+            renderHUD();
         }
 
-        function showInventory() {
-            alert(`INVENTÁRIO DO JOGADOR:\n- Ouro: ${gold}G\n- Poção de Vitalidade (0)\n- Chaves de Portal (0)`);
-        }
-
-        function startSystem() {
-            initAudio(); playSound(660, 'sine', 0.2);
-            document.getElementById('boot-text').innerText = "ACESSO CONCEDIDO";
-            checkPenalty();
-            setTimeout(() => {
-                document.getElementById('boot').style.display = 'none';
-                document.getElementById('hud').style.display = 'flex';
-                setTimeout(() => document.getElementById('hud').style.opacity = '1', 50);
-            }, 1000);
-        }
-
-        window.onload = updateUI;
+        window.onload = init;
     </script>
 </body>
 </html>
