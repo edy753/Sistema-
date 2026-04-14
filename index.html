@@ -3,192 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#050505">
-    <title>SISTEMA SOLO LEVELING: XP TOTAL</title>
+    <title>APEX SYSTEM: SOLO LEVELING</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --neon: #00d4ff; --dark: #050505; --panel: rgba(20, 20, 30, 0.9); 
-            --purple: #a333ff; --red: #ff0044; --gold: #ffd700; --green: #00ff88;
-            --rank-color: var(--neon);
+        :root {
+            --rank-e: #00d4ff; --rank-d: #00ff88; --rank-c: #ffd700;
+            --rank-b: #ff8800; --rank-a: #a333ff; --rank-s: #ff0044;
+            --bg: #050505; --accent: var(--rank-e);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--dark); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: 0.5s; }
+        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; transition: 0.8s ease; }
         
-        .screen { position: fixed; inset: 0; display: none; flex-direction: column; padding: 15px; overflow-y: auto; background: var(--dark); z-index: 10; }
-        .active { display: flex; }
+        /* Efeito de Scanline e Atmosfera */
+        body::before { content: ""; position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none; }
 
-        header { border-bottom: 2px solid var(--rank-color); padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0; transition: 0.5s; }
-        .xp-container { background: #111; height: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #333; overflow: hidden; }
-        #xp-bar { background: linear-gradient(90deg, var(--rank-color), var(--purple)); height: 100%; width: 0%; transition: 1s cubic-bezier(0.15, 0.85, 0.45, 1); }
-
-        .biometric-bar { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 4px; font-size: 0.7rem; margin-bottom: 15px; display: flex; justify-content: space-between; font-family: 'Orbitron'; }
-
-        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .card { background: var(--panel); border-left: 2px solid var(--rank-color); padding: 10px; border-radius: 4px; position: relative; transition: 0.5s; }
-        .card .label { font-size: 0.6rem; color: #888; text-transform: uppercase; }
-        .card .val { font-size: 1.2rem; font-weight: bold; font-family: 'Orbitron'; }
-        .ap-btn { position: absolute; top: 5px; right: 5px; background: var(--green); color: black; border: none; border-radius: 3px; font-size: 0.5rem; padding: 2px 6px; font-weight: bold; cursor: pointer; display: none; }
-
-        .section-title { font-family: 'Orbitron'; font-size: 0.7rem; margin: 20px 0 10px; color: var(--rank-color); border-left: 2px solid var(--rank-color); padding-left: 8px; text-transform: uppercase; transition: 0.5s; }
+        .app-container { display: flex; flex-direction: column; height: 100%; padding: 20px; z-index: 10; position: relative; }
         
-        .quest-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--rank-color); color: var(--rank-color); padding: 8px 12px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; transition: 0.3s; }
-        .btn:active { background: var(--rank-color); color: black; }
+        /* Header Holográfico */
+        header { border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 25px; filter: drop-shadow(0 0 10px var(--accent)); }
+        .player-name { font-family: 'Orbitron'; font-size: 1.4rem; letter-spacing: 2px; text-transform: uppercase; }
+        .rank-tag { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
-        .battle-log { background: #000; border: 1px solid #222; padding: 10px; border-radius: 5px; height: 100px; overflow-y: auto; font-size: 0.6rem; color: #666; font-family: monospace; margin-top: 10px; }
+        /* Barra de XP Infinita e Acumulativa */
+        .xp-wrapper { margin: 15px 0; }
+        .xp-label { display: flex; justify-content: space-between; font-size: 0.7rem; font-family: 'Orbitron'; margin-bottom: 5px; color: #888; }
+        .xp-bar-outer { background: rgba(255,255,255,0.05); height: 12px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; position: relative; }
+        .xp-bar-inner { height: 100%; background: linear-gradient(90deg, var(--accent), #fff); width: 0%; transition: 1.5s cubic-bezier(0.19, 1, 0.22, 1); box-shadow: 0 0 15px var(--accent); }
 
-        #dungeon-overlay { position: fixed; inset: 0; background: radial-gradient(circle, #0a0a1a, #000); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-        input { width:100%; padding:15px; background:#111; border:1px solid #333; color:white; margin-bottom:10px; border-radius:5px; font-family:'Orbitron'; }
+        /* Grid de Status e Biometria */
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 4px; position: relative; overflow: hidden; }
+        .stat-card::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--accent); opacity: 0.5; }
+        .stat-label { font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-val { font-family: 'Orbitron'; font-size: 1.3rem; margin-top: 5px; }
+
+        /* Caixa de Mensagens do Sistema (IA Mode) */
+        .system-msg { background: rgba(0,0,0,0.8); border: 1px solid var(--accent); padding: 10px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 20px; line-height: 1.4; color: var(--accent); font-style: italic; animation: flicker 2s infinite; }
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+        /* Missões Diárias Estilizadas */
+        .mission-list { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .mission-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+        .mission-card:active { background: rgba(255,255,255,0.08); }
+        .mission-info h4 { font-size: 0.8rem; color: var(--accent); margin-bottom: 3px; }
+        .mission-info p { font-size: 0.75rem; color: #aaa; }
+        
+        /* Botões */
+        .btn-action { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 8px 15px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; text-transform: uppercase; border-radius: 2px; }
+
+        /* Modais */
+        .overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; }
+        
+        /* AP Button */
+        .ap-badge { background: var(--rank-d); color: black; font-size: 0.5rem; padding: 2px 5px; border-radius: 2px; margin-left: 10px; animation: bounce 1s infinite; display: none; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
     </style>
 </head>
-<body>
+<body id="body">
 
-    <div id="dungeon-overlay">
-        <h2 style="font-family:'Orbitron'; color:var(--purple); margin-bottom:10px;">INSTÂNCIA ATIVA</h2>
-        <div id="dungeon-timer" style="font-family:'Orbitron'; font-size:3.5rem; color:var(--purple);">00:00</div>
-        <p id="dungeon-task" style="font-size:1.1rem; letter-spacing:1px; margin:20px 0; color:white;"></p>
-        <div style="color:var(--red); font-size:0.6rem; font-family:'Orbitron';">SISTEMA: NÃO MINIMIZE O APLICATIVO!</div>
+    <div id="setup" class="overlay">
+        <h1 style="font-family: 'Orbitron'; color: var(--rank-e); margin-bottom: 40px; letter-spacing: 5px;">SYSTEM INITIALIZATION</h1>
+        <input type="text" id="nameIn" placeholder="IDENTIFICAÇÃO DO PLAYER" style="width:100%; background: #111; border: 1px solid #333; color: white; padding: 15px; margin-bottom: 10px; font-family: 'Orbitron'; font-size: 0.8rem; border-radius: 4px;">
+        <div style="display:flex; gap:10px; margin-bottom: 20px;">
+            <input type="number" id="hIn" placeholder="ALTURA (cm)" style="width:50%; background: #111; border: 1px solid #333; color: white; padding: 15px; font-family: 'Orbitron'; font-size: 0.7rem; border-radius: 4px;">
+            <input type="number" id="wIn" placeholder="PESO (kg)" style="width:50%; background: #111; border: 1px solid #333; color: white; padding: 15px; font-family: 'Orbitron'; font-size: 0.7rem; border-radius: 4px;">
+        </div>
+        <button class="btn-action" onclick="initSystem()" style="width: 100%; padding: 20px; font-size: 0.9rem;">CONCLUIR DESPERTAR</button>
     </div>
 
-    <div id="setup-screen" class="screen" style="justify-content: center;">
-        <h2 style="font-family:'Orbitron'; color:var(--neon); text-align:center; margin-bottom:30px;">REGISTRO DE DESPERTADO</h2>
-        <input type="text" id="in-name" placeholder="NOME DO PLAYER">
-        <input type="number" id="in-height" placeholder="ALTURA (cm)">
-        <input type="number" id="in-weight" placeholder="PESO (kg)">
-        <button class="btn" onclick="completeSetup()" style="width:100%; padding:20px;">DESPERTAR</button>
-    </div>
-
-    <main id="main-screen" class="screen">
-        <header id="main-header">
-            <div style="font-family:'Orbitron'; font-size:1.1rem;"><span id="display-name">---</span> <span id="rank-display" style="float:right; color:var(--rank-color)">RANK E</span></div>
-            <div id="lvl-tag" style="font-size: 0.6rem; color: #888; margin-top: 4px;">LEVEL 1</div>
-            <div class="xp-container"><div id="xp-bar"></div></div>
-            <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-family:'Orbitron'; color:#888;">
-                <span id="xp-text">0 / 100 XP</span>
-                <span>GOLD: <span id="gold-val" style="color:var(--gold)">0</span>G</span>
+    <div class="app-container">
+        <header>
+            <div class="player-name" id="pName">JIN-WOO</div>
+            <div style="display:flex; align-items:center;">
+                <span class="rank-tag" id="pRank">RANK E</span>
+                <span id="apBadge" class="ap-badge">AP DISPONÍVEL</span>
             </div>
         </header>
 
-        <div class="biometric-bar">
-            <span>IMC: <span id="imc-val" style="color:var(--rank-color)">--</span></span>
-            <span id="imc-status">--</span>
+        <div class="xp-wrapper">
+            <div class="xp-label">
+                <span id="pLvl">LEVEL 01</span>
+                <span id="pXpText">0 / 100 XP ACUMULADO</span>
+            </div>
+            <div class="xp-bar-outer">
+                <div class="xp-bar-inner" id="xpBar"></div>
+            </div>
+        </div>
+
+        <div class="system-msg" id="sysMsg">
+            SISTEMA: Aguardando entrada de dados para otimização de caça...
         </div>
 
         <div class="status-grid">
-            <div class="card"><div class="label">Força</div><div class="val" id="str-val">10.0</div><button class="ap-btn" onclick="distributeAP('str')">+ UP</button></div>
-            <div class="card"><div class="label">Mente</div><div class="val" id="int-val">10.0</div><button class="ap-btn" onclick="distributeAP('int')">+ UP</button></div>
+            <div class="stat-card" onclick="distributeAP('str')">
+                <div class="stat-label">Força Muscular</div>
+                <div class="stat-val" id="pStr">10.0</div>
+            </div>
+            <div class="stat-card" onclick="distributeAP('int')">
+                <div class="stat-label">Capacidade Intelectual</div>
+                <div class="stat-val" id="pInt">10.0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Índice de Massa (IMC)</div>
+                <div class="stat-val" id="pImc">0.0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Ouro Acumulado</div>
+                <div class="stat-val" id="pGold" style="color:var(--gold)">0G</div>
+            </div>
         </div>
 
-        <div class="section-title">Missões Diárias</div>
-        <div id="quest-container"></div>
+        <div class="section-title">Missões de Evolução Diária</div>
+        <div class="mission-list" id="mList"></div>
 
-        <div class="section-title">Log de Batalha</div>
-        <div class="battle-log" id="battle-log"></div>
-
-        <div class="section-title">Portais & Mercado</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button class="btn" style="border-color:var(--gold); color:var(--gold);" onclick="buyXP()">POÇÃO XP (500G)</button>
-            <button class="btn" style="border-color:var(--purple); color:var(--purple);" onclick="enterDungeon('Foco Profundo', 20)">DUNGEON (20m)</button>
+        <div style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button class="btn-action" onclick="hardReset()" style="border-color:#222; color:#444;">REINICIAR</button>
+            <button class="btn-action" onclick="usePotion()" id="potBtn" style="border-color:var(--gold); color:var(--gold); display:none;">USAR POÇÃO XP</button>
         </div>
-
-        <button onclick="hardReset()" style="margin-top:40px; background:none; border:none; color:#222; font-size:0.5rem; text-decoration:underline; width:100%;">APAGAR TUDO</button>
-    </main>
+    </div>
 
     <script>
-        const QUEST_DB = [
-            { id: 'q1', title: 'FÍSICO', desc: '15 min de atividade', xp: 25 },
-            { id: 'q2', title: 'ESTUDO', desc: '15 min de leitura', xp: 25 },
-            { id: 'q3', title: 'SAÚDE', desc: 'Beber 2L de água', xp: 25 },
-            { id: 'q4', title: 'DISCIPLINA', desc: 'Organizar ambiente', xp: 25 }
+        let db = JSON.parse(localStorage.getItem('APEX_DATA')) || null;
+
+        const MISSIONS = [
+            { id: 1, t: 'Treino de Força', d: '15 min de calistenia/pesos', xp: 30, type: 'str' },
+            { id: 2, t: 'Expansão Mental', d: '20 min de leitura técnica', xp: 30, type: 'int' },
+            { id: 3, t: 'Vitalidade Hídrica', d: 'Consumir 2.5L de água', xp: 20, type: 'str' },
+            { id: 4, t: 'Ordem de Caçador', d: 'Organizar ambiente de foco', xp: 20, type: 'int' }
         ];
 
-        let stats = JSON.parse(localStorage.getItem('sl_data_final_fix')) || null;
+        function initSystem() {
+            const name = document.getElementById('nameIn').value;
+            const h = parseFloat(document.getElementById('hIn').value);
+            const w = parseFloat(document.getElementById('wIn').value);
+            if(!name || !h || !w) return alert("SISTEMA: Dados incompletos.");
 
-        function completeSetup() {
-            const n = document.getElementById('in-name').value;
-            const h = parseFloat(document.getElementById('in-height').value) / 100;
-            const w = parseFloat(document.getElementById('in-weight').value);
-            if(!n || !h || !w) return;
-            stats = { name: n, h, w, imc: (w/(h*h)).toFixed(1), xp: 0, str: 10, int: 10, gold: 0, ap: 0, completed: [], last: new Date().toLocaleDateString(), logs: [] };
-            addLog("O Despertar começou.");
+            db = {
+                name, h, w, xp: 0, str: 10, int: 10, gold: 0, ap: 0, pots: 0,
+                done: [], last: new Date().toLocaleDateString()
+            };
             save(); render();
         }
 
-        function getProgress(xp) {
-            let level = 1;
-            let xpNext = 100;
-            let totalNeeded = 100;
-            
-            while (xp >= totalNeeded) {
-                level++;
-                xpNext = level * 100;
-                totalNeeded += xpNext;
-            }
-            
-            let prevTotal = totalNeeded - xpNext;
-            let rank = "E", color = "#00d4ff";
-            if(level >= 10) { rank = "D"; color = "#00ff88"; }
-            if(level >= 20) { rank = "C"; color = "#ffd700"; }
-            if(level >= 30) { rank = "B"; color = "#ff8800"; }
-            if(level >= 40) { rank = "A"; color = "#a333ff"; }
-            if(level >= 50) { rank = "S"; color = "#ff0044"; }
+        function save() { localStorage.setItem('APEX_DATA', JSON.stringify(db)); }
 
-            return { level, xpInLevel: xp, nextGoal: totalNeeded, rank, color };
-        }
-
-        function save() { localStorage.setItem('sl_data_final_fix', JSON.stringify(stats)); }
-
-        function addLog(msg) {
-            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            stats.logs.unshift(`[${time}] ${msg}`);
-            if(stats.logs.length > 5) stats.logs.pop();
-        }
-
-        function addXP(amt) {
-            const oldLvl = getProgress(stats.xp).level;
-            stats.xp += amt;
-            const newLvl = getProgress(stats.xp).level;
-            if(newLvl > oldLvl) { stats.ap += 3; addLog(`Level Up! Nível ${newLvl}`); }
-            save(); render();
+        function getLvl(xp) {
+            let l = 1, next = 100, total = 100;
+            while(xp >= total) { l++; next = l * 100; total += next; }
+            const rankData = [
+                { l: 50, r: 'RANK S', c: '#ff0044' }, { l: 40, r: 'RANK A', c: '#a333ff' },
+                { l: 30, r: 'RANK B', c: '#ff8800' }, { l: 20, r: 'RANK C', c: '#ffd700' },
+                { l: 10, r: 'RANK D', c: '#00ff88' }, { l: 0, r: 'RANK E', c: '#00d4ff' }
+            ];
+            const rank = rankData.find(r => l >= r.l);
+            return { l, currentXp: xp, nextGoal: total, rank: rank.r, color: rank.c };
         }
 
         function render() {
-            if(!stats) { document.getElementById('setup-screen').classList.add('active'); return; }
-            document.getElementById('setup-screen').classList.remove('active');
-            document.getElementById('main-screen').classList.add('active');
+            if(!db) return document.getElementById('setup').style.display = 'flex';
+            document.getElementById('setup').style.display = 'none';
 
-            const p = getProgress(stats.xp);
-            document.body.style.setProperty('--rank-color', p.color);
-            document.getElementById('display-name').innerText = stats.name.toUpperCase();
-            document.getElementById('rank-display').innerText = `RANK ${p.rank}`;
-            document.getElementById('lvl-tag').innerText = `LEVEL ${p.level}`;
-            document.getElementById('gold-val').innerText = stats.gold;
-            document.getElementById('str-val').innerText = stats.str;
-            document.getElementById('int-val').innerText = stats.int;
-            document.getElementById('imc-val').innerText = stats.imc;
-            document.getElementById('imc-status').innerText = stats.imc < 25 ? "NORMAL" : "ALERTA";
+            const p = getLvl(db.xp);
+            document.body.style.setProperty('--accent', p.color);
+            document.getElementById('pName').innerText = db.name;
+            document.getElementById('pRank').innerText = p.rank;
+            document.getElementById('pLvl').innerText = `LEVEL ${p.l.toString().padStart(2, '0')}`;
+            document.getElementById('pXpText').innerText = `${Math.floor(db.xp)} / ${p.nextGoal} XP TOTAL`;
+            document.getElementById('xpBar').style.width = (db.xp / p.nextGoal * 100) + "%";
+            document.getElementById('pStr').innerText = db.str.toFixed(1);
+            document.getElementById('pInt').innerText = db.int.toFixed(1);
+            document.getElementById('pGold').innerText = db.gold + "G";
+            
+            const imc = (db.w / ((db.h/100)**2)).toFixed(1);
+            document.getElementById('pImc').innerText = imc;
+            
+            // IA Message
+            const msgs = imc > 25 ? "O sistema sugere foco em agilidade. Seu IMC está elevado." : "Condição física otimizada para o Rank atual.";
+            document.getElementById('sysMsg').innerText = `SISTEMA: ${msgs}`;
 
-            // CORREÇÃO VISUAL DA BARRA: XP TOTAL / META TOTAL
-            document.getElementById('xp-bar').style.width = (stats.xp / p.nextGoal * 100) + "%";
-            document.getElementById('xp-text').innerText = `${stats.xp} / ${p.nextGoal} XP TOTAL`;
+            // AP Badge
+            document.getElementById('apBadge').style.display = db.ap > 0 ? 'inline-block' : 'none';
+            document.getElementById('potBtn').style.display = db.pots > 0 ? 'block' : 'none';
 
-            document.querySelectorAll('.ap-btn').forEach(b => b.style.display = stats.ap > 0 ? 'block' : 'none');
-            document.getElementById('battle-log').innerHTML = stats.logs.map(l => `<div>> ${l}</div>`).join('');
-
-            const qCont = document.getElementById('quest-container');
-            qCont.innerHTML = "";
-            QUEST_DB.filter(q => !stats.completed.includes(q.id)).forEach(q => {
-                qCont.innerHTML += `<div class="quest-box">
-                    <div><div style="font-size:0.5rem; color:var(--rank-color);">${q.title}</div><div style="font-size:0.8rem;">${q.desc}</div></div>
-                    <button class="btn" onclick="stats.completed.push('${q.id}'); stats.gold+=100; addXP(${q.xp});">OK</button>
-                </div>`;
+            // Missions
+            const mCont = document.getElementById('mList');
+            mCont.innerHTML = "";
+            const avail = MISSIONS.filter(m => !db.done.includes(m.id));
+            if(avail.length === 0) mCont.innerHTML = `<p style="color:#444; text-align:center; padding:20px;">Ciclo diário concluído. Descanse.</p>`;
+            avail.forEach(m => {
+                mCont.innerHTML += `
+                    <div class="mission-card">
+                        <div class="mission-info"><h4>${m.t}</h4><p>${m.d}</p></div>
+                        <button class="btn-action" onclick="complete(${m.id}, ${m.xp}, '${m.type}')">OK</button>
+                    </div>`;
             });
         }
 
-        function buyXP() { if(stats.gold >= 500) { stats.gold -= 500; addXP(50); addLog("Poção usada."); } else alert("Gold insuficiente."); }
-        function hardReset() { if(confirm("Apagar tudo?")) { localStorage.clear(); location.reload(); } }
-        window.onload = render;
+        function complete(id, xp, type) {
+            const oldL = getLvl(db.xp).l;
+            db.xp += xp; db.gold += 150; db.done.push(id);
+            const newL = getLvl(db.xp).l;
+            if(newL > oldL) { db.ap += (newL - oldL) * 3; db.pots++; }
+            save(); render();
+        }
+
+        function distributeAP(type) {
+            if(db.ap > 0) { db.ap--; db[type] += 1; save(); render(); }
+        }
+
+        function usePotion() { if(db.pots > 0) { db.pots--; db.xp += 100; save(); render(); } }
+
+        function checkReset() {
+            const today = new Date().toLocaleDateString();
+            if(db && db.last !== today) {
+                if(db.done.length < MISSIONS.length) db.xp = Math.max(0, db.xp - 200);
+                db.done = []; db.last = today; save();
+            }
+        }
+
+        function hardReset() { if(confirm("APAGAR TODOS OS DADOS DO SISTEMA?")) { localStorage.clear(); location.reload(); } }
+
+        window.onload = () => { checkReset(); render(); };
     </script>
 </body>
 </html>
