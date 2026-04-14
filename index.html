@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#050505">
-    <title>SISTEMA SOLO LEVELING: GOLDEN VERSION</title>
+    <title>SISTEMA SOLO LEVELING: ASCENSÃO TOTAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00d4ff; --dark: #050505; --panel: rgba(20, 20, 30, 0.9); --purple: #a333ff; --red: #ff0044; --gold: #ffd700; --green: #00ff88; }
@@ -18,24 +18,27 @@
         .xp-container { background: #111; height: 8px; margin: 10px 0; border-radius: 4px; border: 1px solid #333; overflow: hidden; }
         #xp-bar { background: linear-gradient(90deg, var(--neon), var(--purple)); height: 100%; width: 0%; transition: 0.8s; }
 
+        .biometric-bar { background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.1); padding: 10px; border-radius: 4px; font-size: 0.7rem; margin-bottom: 15px; display: flex; justify-content: space-between; font-family: 'Orbitron'; }
+
         .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .card { background: var(--panel); border-left: 2px solid var(--neon); padding: 10px; border-radius: 4px; position: relative; }
+        .card { background: var(--panel); border-left: 2px solid var(--neon); padding: 10px; border-radius: 4px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .card .label { font-size: 0.6rem; color: #888; text-transform: uppercase; }
         .card .val { font-size: 1.2rem; font-weight: bold; font-family: 'Orbitron'; }
-        .ap-btn { position: absolute; top: 5px; right: 5px; background: var(--green); color: black; border: none; border-radius: 3px; font-size: 0.5rem; padding: 2px 5px; font-weight: bold; cursor: pointer; display: none; }
+        .ap-btn { position: absolute; top: 5px; right: 5px; background: var(--green); color: black; border: none; border-radius: 3px; font-size: 0.5rem; padding: 2px 6px; font-weight: bold; cursor: pointer; display: none; }
 
-        .biometric-bar { background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.1); padding: 8px; border-radius: 4px; font-size: 0.7rem; margin-bottom: 15px; display: flex; justify-content: space-between; }
-
-        .section-title { font-family: 'Orbitron'; font-size: 0.7rem; margin: 15px 0 10px; color: var(--neon); border-left: 2px solid var(--neon); padding-left: 8px; }
-        .quest-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .btn { background: rgba(0, 212, 255, 0.05); border: 1px solid var(--neon); color: var(--neon); padding: 10px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; }
+        .section-title { font-family: 'Orbitron'; font-size: 0.7rem; margin: 20px 0 10px; color: var(--neon); border-left: 2px solid var(--neon); padding-left: 8px; text-transform: uppercase; }
         
+        .quest-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn { background: rgba(0, 212, 255, 0.05); border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; transition: 0.2s; }
+        .btn:active { background: var(--neon); color: black; }
+
         #dungeon-overlay { position: fixed; inset: 0; background: radial-gradient(circle, #0a0a1a, #000); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
         #penalty-alert { background: rgba(255, 0, 68, 0.2); border: 1px solid var(--red); color: var(--red); padding: 10px; margin-bottom: 10px; font-size: 0.7rem; text-align: center; font-family: 'Orbitron'; display: none; }
         
         input { width:100%; padding:15px; background:#111; border:1px solid #333; color:white; margin-bottom:10px; border-radius:5px; font-family:'Orbitron'; }
+        
+        .shop-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .item-card { background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); padding: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -43,7 +46,7 @@
     <div id="dungeon-overlay">
         <h2 style="font-family:'Orbitron'; color:var(--purple); margin-bottom:10px;">INSTÂNCIA ATIVA</h2>
         <div id="dungeon-timer" style="font-family:'Orbitron'; font-size:3.5rem; color:var(--purple);">00:00</div>
-        <p id="dungeon-task" style="font-size:1.1rem; letter-spacing:1px; margin:20px 0;"></p>
+        <p id="dungeon-task" style="font-size:1.1rem; letter-spacing:1px; margin:20px 0; color:white;"></p>
         <div style="color:var(--red); font-size:0.6rem; font-family:'Orbitron'; animation: blink 1s infinite;">AVISO: NÃO MINIMIZE O APLICATIVO!</div>
     </div>
 
@@ -56,12 +59,12 @@
     </div>
 
     <main id="main-screen" class="screen">
-        <div id="penalty-alert">⚠️ PENALIDADE: VOCÊ FALHOU E REGREDIU!</div>
+        <div id="penalty-alert">⚠️ PENALIDADE: VOCÊ FALHOU NO TREINO E REGREDIU!</div>
         
         <header>
-            <div style="font-family:'Orbitron'; font-size:1rem;"><span id="display-name">---</span> <span id="lvl-display" style="float:right; color:var(--neon)">LV. 01</span></div>
+            <div style="font-family:'Orbitron'; font-size:1.1rem;"><span id="display-name">---</span> <span id="lvl-display" style="float:right; color:var(--neon)">LV. 01</span></div>
             <div class="xp-container"><div id="xp-bar"></div></div>
-            <div style="display:flex; justify-content:space-between; font-size:0.6rem; font-family:'Orbitron'; color:#888;">
+            <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-family:'Orbitron'; color:#888;">
                 <span id="xp-text">0 / 100 XP</span>
                 <span>GOLD: <span id="gold-val" style="color:var(--gold)">0</span>G</span>
             </div>
@@ -69,30 +72,32 @@
 
         <div class="biometric-bar">
             <span>IMC: <span id="imc-val" style="color:var(--neon)">--</span></span>
-            <span>STATUS: <span id="imc-status" style="color:var(--neon)">--</span></span>
+            <span id="imc-status" style="color:var(--neon)">--</span>
         </div>
 
         <div class="status-grid">
-            <div class="card">
-                <div class="label">Força</div><div class="val" id="str-val">10.0</div>
-                <button class="ap-btn" id="ap-str" onclick="distributeAP('str')">+ UP</button>
-            </div>
-            <div class="card">
-                <div class="label">Mente</div><div class="val" id="int-val">10.0</div>
-                <button class="ap-btn" id="ap-int" onclick="distributeAP('int')">+ UP</button>
+            <div class="card"><div class="label">Força</div><div class="val" id="str-val">10.0</div><button class="ap-btn" onclick="distributeAP('str')">+ UP</button></div>
+            <div class="card"><div class="label">Mente</div><div class="val" id="int-val">10.0</div><button class="ap-btn" onclick="distributeAP('int')">+ UP</button></div>
+        </div>
+
+        <div class="section-title">Missões Diárias</div>
+        <div id="quest-container"></div>
+
+        <div class="section-title">Mercado de Itens</div>
+        <div class="shop-grid">
+            <div class="item-card">
+                <div><div style="font-size:0.8rem; color:var(--gold);">🧪 Poção de XP</div><div style="font-size:0.5rem; color:#888;">+50 XP Imediato</div></div>
+                <button class="btn" style="border-color:var(--gold); color:var(--gold);" onclick="buyItem('potion', 500)">500G</button>
             </div>
         </div>
 
-        <div class="section-title">MISSÕES DIÁRIAS</div>
-        <div id="quest-container"></div>
-
-        <div class="section-title">PORTAIS DISPONÍVEIS</div>
+        <div class="section-title">Portais Disponíveis</div>
         <div class="quest-box" style="border-color: var(--purple);">
             <div><div style="font-size:0.5rem; color:var(--purple);">INSTÂNCIA</div><div style="font-size:0.8rem;">Foco Profundo (20 min)</div></div>
             <button class="btn" style="border-color:var(--purple); color:var(--purple);" onclick="enterDungeon('Foco Profundo', 20, 'int')">ENTRAR</button>
         </div>
 
-        <button onclick="hardReset()" style="margin-top:30px; background:none; border:none; color:#222; font-size:0.5rem; text-decoration:underline; width:100%;">RESETAR SISTEMA</button>
+        <button onclick="hardReset()" style="margin-top:40px; background:none; border:none; color:#333; font-size:0.5rem; text-decoration:underline; width:100%;">RESETAR DADOS DO SISTEMA</button>
     </main>
 
     <script>
@@ -103,7 +108,7 @@
             { id: 'q4', title: 'DISCIPLINA', desc: 'Organizar ambiente', xp: 25, type: 'int' }
         ];
 
-        let stats = JSON.parse(localStorage.getItem('sl_data_final')) || null;
+        let stats = JSON.parse(localStorage.getItem('sl_data_v5')) || null;
         let activeDungeon = null;
         let dungeonInterval = null;
 
@@ -112,51 +117,41 @@
             const h = parseFloat(document.getElementById('in-height').value) / 100;
             const w = parseFloat(document.getElementById('in-weight').value);
             if(!n || !h || !w) return;
-            const imc = (w / (h * h)).toFixed(1);
-            stats = { name: n, h, w, imc, lvl: 1, xp: 0, str: 10, int: 10, gold: 0, ap: 0, completed: [], last: new Date().toLocaleDateString() };
+            stats = { name: n, h, w, imc: (w/(h*h)).toFixed(1), lvl: 1, xp: 0, str: 10, int: 10, gold: 0, ap: 0, inv: { potion: 0 }, completed: [], last: new Date().toLocaleDateString() };
             save(); render();
         }
 
-        function calculateLevel(xp) {
-            let level = 1;
-            let tempXP = xp;
-            while (tempXP >= (level * 100)) {
-                tempXP -= (level * 100);
-                level++;
+        function getLvlData(xp) {
+            let lvl = 1;
+            let currentXp = xp;
+            while (currentXp >= (lvl * 100)) {
+                currentXp -= (lvl * 100);
+                lvl++;
             }
-            return { level, currentXP: tempXP, nextXP: level * 100 };
+            // xpTotalNecessarioParaLvlAtual = ( (lvl-1) * lvl / 2 ) * 100
+            let baseXP = ((lvl - 1) * lvl / 2) * 100;
+            return { lvl, currentXp, nextXpMax: lvl * 100, baseXP };
         }
 
-        function save() { localStorage.setItem('sl_data_final', JSON.stringify(stats)); }
-
-        function checkDailyReset() {
-            const hoje = new Date().toLocaleDateString();
-            if (stats.last !== hoje) {
-                if(stats.completed.length < QUEST_DB.length) {
-                    const old = calculateLevel(stats.xp).level;
-                    stats.xp = Math.max(0, stats.xp - 150); 
-                    if(calculateLevel(stats.xp).level < old) document.getElementById('penalty-alert').style.display = 'block';
-                }
-                stats.completed = [];
-                stats.last = hoje;
-                save();
-            }
-        }
+        function save() { localStorage.setItem('sl_data_v5', JSON.stringify(stats)); }
 
         function addXP(amt) {
-            const old = calculateLevel(stats.xp).level;
+            const old = getLvlData(stats.xp).lvl;
             stats.xp += amt;
-            const neu = calculateLevel(stats.xp).level;
-            if(neu > old) { stats.ap += (neu - old) * 3; alert(`LEVEL UP! +${(neu - old) * 3} Pontos de Atributo.`); }
+            const neu = getLvlData(stats.xp).lvl;
+            if(neu > old) { stats.ap += (neu - old) * 3; alert(`LEVEL UP! +${(neu - old) * 3} Pontos Disponíveis.`); }
             save(); render();
         }
 
-        function distributeAP(type) {
-            if(stats.ap > 0) { stats.ap--; stats[type]++; save(); render(); }
+        function buyItem(item, cost) {
+            if(stats.gold >= cost) { stats.gold -= cost; stats.inv[item]++; alert("Item Adquirido!"); save(); render(); }
+            else alert("Gold Insuficiente!");
         }
 
+        function distributeAP(type) { if(stats.ap > 0) { stats.ap--; stats[type]++; save(); render(); } }
+
         function enterDungeon(name, mins, type) {
-            if(!confirm("Deseja entrar? Sair do app causará perda massiva de XP.")) return;
+            if(!confirm("Entrar na Dungeon? Sair do app causará perda de XP.")) return;
             activeDungeon = { name, type, seconds: mins * 60 };
             document.getElementById('dungeon-overlay').style.display = 'flex';
             document.getElementById('dungeon-task').innerText = name.toUpperCase();
@@ -167,9 +162,10 @@
                 document.getElementById('dungeon-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
                 if(activeDungeon.seconds <= 0) {
                     clearInterval(dungeonInterval);
-                    stats.gold += 500; addXP(200);
+                    stats.gold += 400; addXP(150);
                     document.getElementById('dungeon-overlay').style.display = 'none';
                     activeDungeon = null;
+                    alert("DUNGEON CONCLUÍDA!");
                 }
             }, 1000);
         }
@@ -177,10 +173,10 @@
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && activeDungeon) {
                 clearInterval(dungeonInterval);
-                stats.xp = Math.max(0, stats.xp - 200);
+                stats.xp = Math.max(0, stats.xp - 250); // Punição de fuga
                 activeDungeon = null;
                 document.getElementById('dungeon-overlay').style.display = 'none';
-                alert("FALHA NA INSTÂNCIA! XP REDUZIDO.");
+                alert("VOCÊ ABANDONOU A INSTÂNCIA! PENALIDADE SEVERA.");
                 save(); render();
             }
         });
@@ -190,19 +186,18 @@
             document.getElementById('setup-screen').classList.remove('active');
             document.getElementById('main-screen').classList.add('active');
 
-            const p = calculateLevel(stats.xp);
+            const l = getLvlData(stats.xp);
             document.getElementById('display-name').innerText = stats.name.toUpperCase();
-            document.getElementById('lvl-display').innerText = `LV. ${p.level}`;
-            document.getElementById('xp-bar').style.width = (p.currentXP / p.nextXP * 100) + "%";
-            document.getElementById('xp-text').innerText = `${p.currentXP} / ${p.nextXP} XP`;
+            document.getElementById('lvl-display').innerText = `LV. ${l.lvl}`;
+            document.getElementById('xp-bar').style.width = (l.currentXp / l.nextXpMax * 100) + "%";
+            document.getElementById('xp-text').innerText = `${l.currentXp} / ${l.nextXpMax} XP (Total: ${stats.xp})`;
             document.getElementById('gold-val').innerText = stats.gold;
             document.getElementById('str-val').innerText = stats.str;
             document.getElementById('int-val').innerText = stats.int;
             document.getElementById('imc-val').innerText = stats.imc;
-            document.getElementById('imc-status').innerText = stats.imc < 25 ? "IDEAL" : "ALERTA";
+            document.getElementById('imc-status').innerText = stats.imc < 25 ? "STATUS: IDEAL" : "STATUS: ALERTA";
 
-            const btns = document.querySelectorAll('.ap-btn');
-            btns.forEach(b => b.style.display = stats.ap > 0 ? 'block' : 'none');
+            document.querySelectorAll('.ap-btn').forEach(b => b.style.display = stats.ap > 0 ? 'block' : 'none');
 
             const qCont = document.getElementById('quest-container');
             qCont.innerHTML = "";
@@ -214,8 +209,14 @@
             });
         }
 
-        function hardReset() { if(confirm("Resetar?")) { localStorage.clear(); location.reload(); } }
-        window.onload = () => { if(stats) checkDailyReset(); render(); };
+        function hardReset() { if(confirm("Deseja apagar seu progresso?")) { localStorage.clear(); location.reload(); } }
+        window.onload = () => { 
+            if(stats && stats.last !== new Date().toLocaleDateString()) {
+                if(stats.completed.length < QUEST_DB.length) { stats.xp = Math.max(0, stats.xp - 150); document.getElementById('penalty-alert').style.display = 'block'; }
+                stats.completed = []; stats.last = new Date().toLocaleDateString(); save();
+            }
+            render(); 
+        };
     </script>
 </body>
 </html>
