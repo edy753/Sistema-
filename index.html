@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#050505">
-    <title>SISTEMA SOLO LEVELING: O ÁPICE</title>
+    <title>SISTEMA SOLO LEVELING: XP TOTAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -37,11 +37,8 @@
         .btn:active { background: var(--rank-color); color: black; }
 
         .battle-log { background: #000; border: 1px solid #222; padding: 10px; border-radius: 5px; height: 100px; overflow-y: auto; font-size: 0.6rem; color: #666; font-family: monospace; margin-top: 10px; }
-        .log-entry { margin-bottom: 4px; border-bottom: 1px solid #111; padding-bottom: 2px; }
 
         #dungeon-overlay { position: fixed; inset: 0; background: radial-gradient(circle, #0a0a1a, #000); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-        #penalty-alert { background: rgba(255, 0, 68, 0.2); border: 1px solid var(--red); color: var(--red); padding: 10px; margin-bottom: 10px; font-size: 0.7rem; text-align: center; font-family: 'Orbitron'; display: none; }
-        
         input { width:100%; padding:15px; background:#111; border:1px solid #333; color:white; margin-bottom:10px; border-radius:5px; font-family:'Orbitron'; }
     </style>
 </head>
@@ -51,7 +48,7 @@
         <h2 style="font-family:'Orbitron'; color:var(--purple); margin-bottom:10px;">INSTÂNCIA ATIVA</h2>
         <div id="dungeon-timer" style="font-family:'Orbitron'; font-size:3.5rem; color:var(--purple);">00:00</div>
         <p id="dungeon-task" style="font-size:1.1rem; letter-spacing:1px; margin:20px 0; color:white;"></p>
-        <div style="color:var(--red); font-size:0.6rem; font-family:'Orbitron'; animation: blink 1s infinite;">AVISO: NÃO MINIMIZE O APLICATIVO!</div>
+        <div style="color:var(--red); font-size:0.6rem; font-family:'Orbitron';">SISTEMA: NÃO MINIMIZE O APLICATIVO!</div>
     </div>
 
     <div id="setup-screen" class="screen" style="justify-content: center;">
@@ -63,8 +60,6 @@
     </div>
 
     <main id="main-screen" class="screen">
-        <div id="penalty-alert">⚠️ ALERTA: REGRESSÃO DE RANK DETECTADA!</div>
-        
         <header id="main-header">
             <div style="font-family:'Orbitron'; font-size:1.1rem;"><span id="display-name">---</span> <span id="rank-display" style="float:right; color:var(--rank-color)">RANK E</span></div>
             <div id="lvl-tag" style="font-size: 0.6rem; color: #888; margin-top: 4px;">LEVEL 1</div>
@@ -89,17 +84,15 @@
         <div id="quest-container"></div>
 
         <div class="section-title">Log de Batalha</div>
-        <div class="battle-log" id="battle-log">
-            <div class="log-entry">> Sistema inicializado...</div>
-        </div>
+        <div class="battle-log" id="battle-log"></div>
 
-        <div class="section-title">Mercado & Portais</div>
+        <div class="section-title">Portais & Mercado</div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button class="btn" style="border-color:var(--gold); color:var(--gold);" onclick="buyItem('potion', 500)">COMPRAR POÇÃO (500G)</button>
+            <button class="btn" style="border-color:var(--gold); color:var(--gold);" onclick="buyXP()">POÇÃO XP (500G)</button>
             <button class="btn" style="border-color:var(--purple); color:var(--purple);" onclick="enterDungeon('Foco Profundo', 20)">DUNGEON (20m)</button>
         </div>
 
-        <button onclick="hardReset()" style="margin-top:40px; background:none; border:none; color:#222; font-size:0.5rem; text-decoration:underline; width:100%;">APAGAR DADOS DO SISTEMA</button>
+        <button onclick="hardReset()" style="margin-top:40px; background:none; border:none; color:#222; font-size:0.5rem; text-decoration:underline; width:100%;">APAGAR TUDO</button>
     </main>
 
     <script>
@@ -110,151 +103,92 @@
             { id: 'q4', title: 'DISCIPLINA', desc: 'Organizar ambiente', xp: 25 }
         ];
 
-        let stats = JSON.parse(localStorage.getItem('sl_data_apex')) || null;
-        let activeDungeon = null;
-        let dungeonInterval = null;
+        let stats = JSON.parse(localStorage.getItem('sl_data_final_fix')) || null;
 
         function completeSetup() {
             const n = document.getElementById('in-name').value;
             const h = parseFloat(document.getElementById('in-height').value) / 100;
             const w = parseFloat(document.getElementById('in-weight').value);
             if(!n || !h || !w) return;
-            stats = { name: n, h, w, imc: (w/(h*h)).toFixed(1), xp: 0, str: 10, int: 10, gold: 0, ap: 0, inv: { potion: 0 }, completed: [], last: new Date().toLocaleDateString(), logs: [] };
-            addLog("Contrato assinado. O Despertar começou.");
+            stats = { name: n, h, w, imc: (w/(h*h)).toFixed(1), xp: 0, str: 10, int: 10, gold: 0, ap: 0, completed: [], last: new Date().toLocaleDateString(), logs: [] };
+            addLog("O Despertar começou.");
             save(); render();
         }
 
         function getProgress(xp) {
             let level = 1;
-            let xpRequired = 100;
-            let totalNeededForPrevLevels = 0;
+            let xpNext = 100;
+            let totalNeeded = 100;
             
-            while (xp >= (totalNeededForPrevLevels + (level * 100))) {
-                totalNeededForPrevLevels += (level * 100);
+            while (xp >= totalNeeded) {
                 level++;
+                xpNext = level * 100;
+                totalNeeded += xpNext;
             }
             
-            let currentLevelXP = xp - totalNeededForPrevLevels;
-            let nextLevelGoal = level * 100;
-            
-            let rank = "E";
-            let color = "#00d4ff";
+            let prevTotal = totalNeeded - xpNext;
+            let rank = "E", color = "#00d4ff";
             if(level >= 10) { rank = "D"; color = "#00ff88"; }
             if(level >= 20) { rank = "C"; color = "#ffd700"; }
             if(level >= 30) { rank = "B"; color = "#ff8800"; }
             if(level >= 40) { rank = "A"; color = "#a333ff"; }
             if(level >= 50) { rank = "S"; color = "#ff0044"; }
 
-            return { level, currentLevelXP, nextLevelGoal, rank, color };
+            return { level, xpInLevel: xp, nextGoal: totalNeeded, rank, color };
         }
 
-        function save() { localStorage.setItem('sl_data_apex', JSON.stringify(stats)); }
+        function save() { localStorage.setItem('sl_data_final_fix', JSON.stringify(stats)); }
 
         function addLog(msg) {
             const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             stats.logs.unshift(`[${time}] ${msg}`);
-            if(stats.logs.length > 10) stats.logs.pop();
+            if(stats.logs.length > 5) stats.logs.pop();
         }
 
         function addXP(amt) {
             const oldLvl = getProgress(stats.xp).level;
             stats.xp += amt;
-            const neu = getProgress(stats.xp).level;
-            if(neu > oldLvl) { 
-                stats.ap += (neu - oldLvl) * 3; 
-                addLog(`SUBIU DE NÍVEL! Agora Level ${neu}.`);
-            }
+            const newLvl = getProgress(stats.xp).level;
+            if(newLvl > oldLvl) { stats.ap += 3; addLog(`Level Up! Nível ${newLvl}`); }
             save(); render();
         }
 
-        function distributeAP(type) { if(stats.ap > 0) { stats.ap--; stats[type]++; addLog(`Ponto atribuído a ${type.toUpperCase()}.`); save(); render(); } }
-
-        function buyItem(item, cost) {
-            if(stats.gold >= cost) { stats.gold -= cost; stats.inv[item]++; addLog("Poção de XP adquirida."); save(); render(); }
-            else alert("Gold insuficiente!");
-        }
-
-        function enterDungeon(name, mins) {
-            if(!confirm("Entrar na instância? A fuga custará seu nível!")) return;
-            activeDungeon = { name, seconds: mins * 60 };
-            document.getElementById('dungeon-overlay').style.display = 'flex';
-            document.getElementById('dungeon-task').innerText = name.toUpperCase();
-            dungeonInterval = setInterval(() => {
-                activeDungeon.seconds--;
-                const m = Math.floor(activeDungeon.seconds / 60);
-                const s = activeDungeon.seconds % 60;
-                document.getElementById('dungeon-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if(activeDungeon.seconds <= 0) {
-                    clearInterval(dungeonInterval);
-                    stats.gold += 500; addXP(200);
-                    addLog("Dungeon concluída com sucesso.");
-                    document.getElementById('dungeon-overlay').style.display = 'none';
-                    activeDungeon = null;
-                }
-            }, 1000);
-        }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && activeDungeon) {
-                clearInterval(dungeonInterval);
-                const oldLvl = getProgress(stats.xp).level;
-                stats.xp = Math.max(0, stats.xp - 300);
-                const newLvl = getProgress(stats.xp).level;
-                activeDungeon = null;
-                document.getElementById('dungeon-overlay').style.display = 'none';
-                addLog(`FALHA NA DUNGEON! Perda de XP detectada.`);
-                if(newLvl < oldLvl) addLog(`REGRESSÃO: Caçador caiu para Level ${newLvl}.`);
-                save(); render();
-            }
-        });
-
         function render() {
-            if(!stats) return document.getElementById('setup-screen').classList.add('active');
+            if(!stats) { document.getElementById('setup-screen').classList.add('active'); return; }
             document.getElementById('setup-screen').classList.remove('active');
             document.getElementById('main-screen').classList.add('active');
 
             const p = getProgress(stats.xp);
             document.body.style.setProperty('--rank-color', p.color);
-            
             document.getElementById('display-name').innerText = stats.name.toUpperCase();
             document.getElementById('rank-display').innerText = `RANK ${p.rank}`;
-            document.getElementById('rank-display').style.color = p.color;
             document.getElementById('lvl-tag').innerText = `LEVEL ${p.level}`;
-            
-            document.getElementById('xp-bar').style.width = (p.currentLevelXP / p.nextLevelGoal * 100) + "%";
-            document.getElementById('xp-text').innerText = `${Math.floor(p.currentLevelXP)} / ${p.nextLevelGoal} XP`;
             document.getElementById('gold-val').innerText = stats.gold;
             document.getElementById('str-val').innerText = stats.str;
             document.getElementById('int-val').innerText = stats.int;
             document.getElementById('imc-val').innerText = stats.imc;
-            document.getElementById('imc-status').innerText = stats.imc < 25 ? "CONDIÇÃO: NORMAL" : "CONDIÇÃO: ALERTA";
+            document.getElementById('imc-status').innerText = stats.imc < 25 ? "NORMAL" : "ALERTA";
+
+            // CORREÇÃO VISUAL DA BARRA: XP TOTAL / META TOTAL
+            document.getElementById('xp-bar').style.width = (stats.xp / p.nextGoal * 100) + "%";
+            document.getElementById('xp-text').innerText = `${stats.xp} / ${p.nextGoal} XP TOTAL`;
 
             document.querySelectorAll('.ap-btn').forEach(b => b.style.display = stats.ap > 0 ? 'block' : 'none');
-
-            const logCont = document.getElementById('battle-log');
-            logCont.innerHTML = stats.logs.map(l => `<div class="log-entry">> ${l}</div>`).join('');
+            document.getElementById('battle-log').innerHTML = stats.logs.map(l => `<div>> ${l}</div>`).join('');
 
             const qCont = document.getElementById('quest-container');
             qCont.innerHTML = "";
             QUEST_DB.filter(q => !stats.completed.includes(q.id)).forEach(q => {
                 qCont.innerHTML += `<div class="quest-box">
                     <div><div style="font-size:0.5rem; color:var(--rank-color);">${q.title}</div><div style="font-size:0.8rem;">${q.desc}</div></div>
-                    <button class="btn" onclick="stats.completed.push('${q.id}'); stats.gold+=120; addLog('Missão ${q.title} concluída.'); addXP(${q.xp});">OK</button>
+                    <button class="btn" onclick="stats.completed.push('${q.id}'); stats.gold+=100; addXP(${q.xp});">OK</button>
                 </div>`;
             });
         }
 
-        function hardReset() { if(confirm("Deseja apagar tudo?")) { localStorage.clear(); location.reload(); } }
-        window.onload = () => { 
-            if(stats && stats.last !== new Date().toLocaleDateString()) {
-                if(stats.completed.length < QUEST_DB.length) { 
-                    stats.xp = Math.max(0, stats.xp - 200); 
-                    addLog("Penalidade diária aplicada por negligência.");
-                }
-                stats.completed = []; stats.last = new Date().toLocaleDateString(); save();
-            }
-            render(); 
-        };
+        function buyXP() { if(stats.gold >= 500) { stats.gold -= 500; addXP(50); addLog("Poção usada."); } else alert("Gold insuficiente."); }
+        function hardReset() { if(confirm("Apagar tudo?")) { localStorage.clear(); location.reload(); } }
+        window.onload = render;
     </script>
 </body>
 </html>
