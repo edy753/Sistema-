@@ -4,206 +4,172 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#050505">
-    <title>SOLO LEVELING: EVOLUTION</title>
+    <title>SOLO LEVELING: PROGRESSION</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00d4ff; --dark: #050505; --panel: rgba(20, 20, 30, 0.9); --purple: #a333ff; --red: #ff0044; --gold: #ffd700; --green: #00ff88; }
+        :root { --neon: #00d4ff; --dark: #050505; --panel: rgba(20, 20, 30, 0.9); --purple: #a333ff; --red: #ff0044; --gold: #ffd700; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--dark); color: white; height: 100vh; overflow: hidden; }
+        body { background: var(--dark); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
         .screen { position: fixed; inset: 0; display: none; flex-direction: column; padding: 15px; overflow-y: auto; }
         .active { display: flex; }
 
         header { border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; }
-        .xp-container { background: #111; height: 6px; margin: 8px 0; border-radius: 3px; border: 1px solid #333; overflow: hidden; }
+        .xp-container { background: #111; height: 8px; margin: 10px 0; border-radius: 4px; border: 1px solid #333; overflow: hidden; }
         #xp-bar { background: linear-gradient(90deg, var(--neon), var(--purple)); height: 100%; width: 0%; transition: 0.8s; }
 
-        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
-        .card { background: var(--panel); border-left: 2px solid var(--neon); padding: 8px; border-radius: 4px; }
-        .card .label { font-size: 0.55rem; color: #888; text-transform: uppercase; }
-        .card .val { font-size: 1.1rem; font-weight: bold; font-family: 'Orbitron'; }
+        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        .card { background: var(--panel); border-left: 2px solid var(--neon); padding: 10px; border-radius: 4px; }
+        .card .label { font-size: 0.6rem; color: #888; text-transform: uppercase; }
+        .card .val { font-size: 1.2rem; font-weight: bold; font-family: 'Orbitron'; }
 
-        .section-title { font-family: 'Orbitron'; font-size: 0.7rem; margin: 15px 0 8px; color: var(--neon); display: flex; justify-content: space-between; align-items: center; }
-
-        .quest-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-
-        .btn { background: rgba(0, 212, 255, 0.05); border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; transition: 0.2s; }
-        .btn:active { background: var(--neon); color: #000; }
-
-        .empty-msg { text-align: center; color: #444; font-size: 0.8rem; margin: 20px 0; font-style: italic; }
-        #penalty-alert { background: rgba(255, 0, 68, 0.2); border: 1px solid var(--red); color: var(--red); padding: 8px; margin-bottom: 10px; font-size: 0.7rem; text-align: center; font-family: 'Orbitron'; display: none; }
+        .section-title { font-family: 'Orbitron'; font-size: 0.7rem; margin: 10px 0; color: var(--neon); display: flex; justify-content: space-between; }
+        .quest-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn { background: rgba(0, 212, 255, 0.05); border: 1px solid var(--neon); color: var(--neon); padding: 10px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; }
+        
+        #penalty-alert { background: rgba(255, 0, 68, 0.2); border: 1px solid var(--red); color: var(--red); padding: 10px; margin-bottom: 15px; font-size: 0.7rem; text-align: center; display: none; }
+        .empty-msg { text-align: center; padding: 40px; color: #444; font-size: 0.9rem; font-style: italic; }
     </style>
 </head>
 <body>
 
     <div id="setup-screen" class="screen" style="justify-content: center;">
-        <h2 style="font-family: 'Orbitron'; color: var(--neon); text-align: center; margin-bottom: 20px;">DESPERTAR DO SISTEMA</h2>
+        <h2 style="font-family: 'Orbitron'; color: var(--neon); text-align: center; margin-bottom: 20px;">INICIALIZANDO SISTEMA</h2>
         <input type="text" id="in-name" placeholder="NOME DO PLAYER" style="width:100%; padding:15px; background:#111; border:1px solid #333; color:white; margin-bottom:10px;">
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <input type="number" id="in-height" placeholder="ALTURA (cm)" style="width:50%; padding:15px; background:#111; border:1px solid #333; color:white;">
-            <input type="number" id="in-weight" placeholder="PESO (kg)" style="width:50%; padding:15px; background:#111; border:1px solid #333; color:white;">
-        </div>
-        <button class="btn" onclick="completeSetup()" style="padding:20px;">INICIAR EVOLUÇÃO</button>
+        <input type="number" id="in-height" placeholder="ALTURA (cm)" style="width:100%; padding:15px; background:#111; border:1px solid #333; color:white; margin-bottom:10px;">
+        <input type="number" id="in-weight" placeholder="PESO (kg)" style="width:100%; padding:15px; background:#111; border:1px solid #333; color:white; margin-bottom:15px;">
+        <button class="btn" onclick="completeSetup()" style="padding:20px;">DESPERTAR</button>
     </div>
 
-    <div id="main-screen" class="screen">
-        <div id="penalty-alert">⚠️ PUNIÇÃO: VOCÊ NEGLEGENCIOU SEU DESENVOLVIMENTO ONTEM.</div>
+    <main id="main-screen" class="screen">
+        <div id="penalty-alert">⚠️ PUNIÇÃO: VOCÊ FALHOU NAS MISSÕES ANTERIORES! XP REDUZIDO.</div>
         
         <header>
-            <div style="font-family:'Orbitron'; font-size: 1rem;"><span id="display-name">---</span> <span id="lvl-display" style="float:right; color:var(--neon)">LV. 01</span></div>
-            <div id="player-title" style="font-size: 0.6rem; color: var(--purple); margin-bottom: 5px; font-weight: bold;">TÍTULO: O MAIS FRACO</div>
+            <div style="font-family: 'Orbitron'; font-size: 1.1rem;"><span id="display-name">---</span> <span id="lvl-display" style="float:right; color:var(--neon)">LV. 01</span></div>
+            <div id="player-title" style="font-size: 0.6rem; color: var(--purple); margin-top: 5px;">TÍTULO: O MAIS FRACO</div>
             <div class="xp-container"><div id="xp-bar"></div></div>
-            <div style="display:flex; justify-content:space-between; font-size:0.6rem;">
-                <span id="imc-tag">CONDIÇÃO: ---</span>
-                <span>OURO: <span id="gold-val" style="color:var(--gold)">0</span>G</span>
+            <div style="display: flex; justify-content: space-between; font-size: 0.6rem;">
+                <span id="xp-text">0 / 100 XP</span>
+                <span>GOLD: <span id="gold-val" style="color: var(--gold);">0</span>G</span>
             </div>
         </header>
 
         <div class="status-grid">
-            <div class="card"><div class="label">Força (Físico)</div><div class="val" id="str-val">10</div></div>
-            <div class="card"><div class="label">Inteligência (Mente)</div><div class="val" id="int-val">10</div></div>
+            <div class="card"><div class="label">Força</div><div class="val" id="str-val">10</div></div>
+            <div class="card"><div class="label">Inteligência</div><div class="val" id="int-val">10</div></div>
         </div>
 
-        <div class="section-title">
-            <span>MISSÕES DIÁRIAS</span>
-            <span id="quest-count" style="font-size: 0.5rem; color: #666;"></span>
-        </div>
-        <div id="quest-container">
-            </div>
-
-        <div class="section-title"><span>INVENTÁRIO</span></div>
-        <div style="background: rgba(255,255,255,0.02); padding: 10px; border-radius: 5px; font-size: 0.7rem; color: #888; border: 1px solid #222;">
-            POÇÕES DE XP: <span id="count-potion" style="color: var(--neon)">0</span>
-            <button class="btn" onclick="usePotion()" style="float:right; padding: 2px 8px; font-size: 0.5rem;">USAR</button>
-        </div>
-    </div>
+        <div class="section-title"><span>MISSÕES DIÁRIAS</span> <span id="date-label" style="color:#444"></span></div>
+        <div id="quest-container"></div>
+    </main>
 
     <script>
-        let stats = JSON.parse(localStorage.getItem('sl_data')) || null;
-
-        // Lista de Missões de Desenvolvimento Pessoal
-        const QUEST_DATABASE = [
-            { id: 'q1', title: 'SAÚDE', desc: '15 min de atividade física', type: 'str', xp: 30 },
-            { id: 'q2', title: 'FOCO', desc: 'Ler 10 páginas de um livro', type: 'int', xp: 25 },
-            { id: 'q3', title: 'MENTALIDADE', desc: '5 min de Meditação/Silêncio', type: 'int', xp: 20 },
-            { id: 'q4', title: 'DISCIPLINA', desc: 'Arrumar o quarto/mesa de trabalho', type: 'str', xp: 15 }
+        // Banco de Missões com XP somando 100
+        const DAILY_QUESTS = [
+            { id: 'q1', title: 'CORPO', desc: '15 min de treino físico', xp: 30, type: 'str' },
+            { id: 'q2', title: 'MENTE', desc: '15 min de estudo focado', xp: 30, type: 'int' },
+            { id: 'q3', title: 'HÁBITO', desc: 'Beber 2L de água hoje', xp: 20, type: 'str' },
+            { id: 'q4', title: 'FOCO', desc: 'Arrumar seu ambiente de trabalho', xp: 20, type: 'int' }
         ];
+
+        let stats = JSON.parse(localStorage.getItem('sl_data')) || null;
 
         function completeSetup() {
             const name = document.getElementById('in-name').value;
-            const h = parseFloat(document.getElementById('in-height').value) / 100;
-            const w = parseFloat(document.getElementById('in-weight').value);
-            if(!name || !h || !w) return alert("Preencha tudo!");
-            
-            const imc = (w / (h * h)).toFixed(1);
+            if(!name) return alert("Insira seu nome!");
             stats = {
-                name: name, lvl: 1, xp: 0, gold: 0, str: 10, int: 10, imc: imc,
-                items: { potion: 0 },
-                completedQuests: [], // Armazena IDs das missões feitas hoje
-                lastVisit: new Date().toLocaleDateString()
+                name: name, lvl: 1, xp: 0, str: 10, int: 10, gold: 0,
+                completedToday: [],
+                lastDate: new Date().toLocaleDateString()
             };
-            saveAndRefresh();
+            save();
+            render();
         }
 
-        function checkDailyReset() {
+        function checkReset() {
             const hoje = new Date().toLocaleDateString();
-            if(stats.lastVisit !== hoje) {
-                // Se mudou o dia e ele não fez nenhuma missão ontem, pune
-                if(stats.completedQuests.length === 0) {
-                    stats.xp = Math.max(0, stats.xp - 40);
+            if (stats.lastDate !== hoje) {
+                // Penalidade se não completou todas ontem
+                if (stats.completedToday.length < DAILY_QUESTS.length) {
+                    stats.xp = Math.max(0, stats.xp - 50);
                     document.getElementById('penalty-alert').style.display = 'block';
                 }
-                stats.completedQuests = []; // Reseta as missões para o novo dia
-                stats.lastVisit = hoje;
-                saveAndRefresh();
+                stats.completedToday = [];
+                stats.lastDate = hoje;
+                save();
             }
         }
 
-        function getTitle(lvl) {
-            if(lvl < 5) return "O MAIS FRACO";
-            if(lvl < 10) return "EXPLORADOR ERRANTE";
-            if(lvl < 20) return "CAÇADOR RANK D";
-            if(lvl < 35) return "CAÇADOR RANK C";
-            return "SOBERANO EM ASCENSÃO";
-        }
-
-        function renderHUD() {
-            if(!stats) return document.getElementById('setup-screen').classList.add('active');
-            
-            document.getElementById('main-screen').classList.add('active');
-            document.getElementById('display-name').innerText = stats.name.toUpperCase();
-            document.getElementById('lvl-display').innerText = `LV. ${stats.lvl}`;
-            document.getElementById('player-title').innerText = `TÍTULO: ${getTitle(stats.lvl)}`;
-            document.getElementById('gold-val').innerText = stats.gold;
-            document.getElementById('str-val').innerText = stats.str;
-            document.getElementById('int-val').innerText = stats.int;
-            document.getElementById('xp-bar').style.width = (stats.xp % 100) + "%";
-            document.getElementById('count-potion').innerText = stats.items.potion;
-            document.getElementById('imc-tag').innerText = `CONDIÇÃO IMC: ${stats.imc}`;
-
-            renderQuests();
-        }
-
-        function renderQuests() {
-            const container = document.getElementById('quest-container');
-            const availableQuests = QUEST_DATABASE.filter(q => !stats.completedQuests.includes(q.id));
-            
-            container.innerHTML = "";
-            document.getElementById('quest-count').innerText = `${availableQuests.length} RESTANTES`;
-
-            if(availableQuests.length === 0) {
-                container.innerHTML = '<div class="empty-msg">Todas as missões de hoje foram concluídas. Descanse, Player.</div>';
-                return;
-            }
-
-            availableQuests.forEach(q => {
-                const div = document.createElement('div');
-                div.className = 'quest-box';
-                div.innerHTML = `
-                    <div>
-                        <div style="color:var(--neon); font-size:0.5rem; font-weight:bold;">${q.title}</div>
-                        <div style="font-size:0.85rem">${q.desc}</div>
-                    </div>
-                    <button class="btn" onclick="completeQuest('${q.id}', ${q.xp}, '${q.type}')">CONCLUIR</button>
-                `;
-                container.appendChild(div);
-            });
+        function getXPRequired() {
+            // Regra: Nível 1-5 = 100 XP | Nível 6+ = 200 XP
+            return stats.lvl <= 5 ? 100 : 200;
         }
 
         function completeQuest(id, xpAmt, type) {
-            stats.completedQuests.push(id);
+            stats.completedToday.push(id);
             stats.xp += xpAmt;
-            stats.gold += 100;
+            stats.gold += 150;
             if(type === 'str') stats.str += 0.5; else stats.int += 0.5;
 
-            if(stats.xp >= 100) {
+            const required = getXPRequired();
+            if (stats.xp >= required) {
+                stats.xp -= required;
                 stats.lvl++;
-                stats.xp -= 100;
-                stats.items.potion++; // Ganha uma poção ao subir nível
-                alert(`LEVEL UP! Você agora é um ${getTitle(stats.lvl)}`);
+                alert(`LEVEL UP! Agora você está no nível ${stats.lvl}`);
             }
-            saveAndRefresh();
+            save();
+            render();
         }
 
-        function saveAndRefresh() {
+        function save() {
             localStorage.setItem('sl_data', JSON.stringify(stats));
-            renderHUD();
         }
 
-        function usePotion() {
-            if(stats.items.potion > 0) {
-                stats.items.potion--;
-                stats.xp += 50;
-                if(stats.xp >= 100) { stats.lvl++; stats.xp -= 100; }
-                saveAndRefresh();
+        function render() {
+            if (!stats) {
+                document.getElementById('setup-screen').classList.add('active');
+                return;
+            }
+            
+            checkReset();
+            document.getElementById('setup-screen').classList.remove('active');
+            document.getElementById('main-screen').classList.add('active');
+
+            const req = getXPRequired();
+            document.getElementById('display-name').innerText = stats.name.toUpperCase();
+            document.getElementById('lvl-display').innerText = `LV. ${stats.lvl}`;
+            document.getElementById('xp-bar').style.width = (stats.xp / req * 100) + "%";
+            document.getElementById('xp-text').innerText = `${stats.xp} / ${req} XP`;
+            document.getElementById('gold-val').innerText = stats.gold;
+            document.getElementById('str-val').innerText = stats.str.toFixed(1);
+            document.getElementById('int-val').innerText = stats.int.toFixed(1);
+            document.getElementById('date-label').innerText = stats.lastDate;
+
+            // Render de Missões (Apenas as não concluídas)
+            const qContainer = document.getElementById('quest-container');
+            qContainer.innerHTML = "";
+            
+            const available = DAILY_QUESTS.filter(q => !stats.completedToday.includes(q.id));
+
+            if (available.length === 0) {
+                qContainer.innerHTML = `<div class="empty-msg">Missões diárias concluídas. Retorne amanhã para novos desafios.</div>`;
+            } else {
+                available.forEach(q => {
+                    const div = document.createElement('div');
+                    div.className = 'quest-box';
+                    div.innerHTML = `
+                        <div>
+                            <div style="font-size:0.5rem; color:var(--neon); font-weight:bold;">${q.title}</div>
+                            <div style="font-size:0.85rem">${q.desc}</div>
+                        </div>
+                        <button class="btn" onclick="completeQuest('${q.id}', ${q.xp}, '${q.type}')">+${q.xp}XP</button>
+                    `;
+                    qContainer.appendChild(div);
+                });
             }
         }
 
-        window.onload = () => {
-            if(stats) checkDailyReset();
-            renderHUD();
-        };
+        window.onload = render;
     </script>
 </body>
 </html>
