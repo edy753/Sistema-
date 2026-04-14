@@ -4,40 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#050505">
-    <title>SOLO LEVELING: INVENTORY SYSTEM</title>
+    <title>SISTEMA SOLO LEVELING: O ÁPICE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00d4ff; --dark: #050505; --panel: rgba(20, 20, 30, 0.9); --purple: #a333ff; --red: #ff0044; --gold: #ffd700; --green: #00ff88; }
+        :root { 
+            --neon: #00d4ff; --dark: #050505; --panel: rgba(20, 20, 30, 0.9); 
+            --purple: #a333ff; --red: #ff0044; --gold: #ffd700; --green: #00ff88;
+            --rank-color: var(--neon);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--dark); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { background: var(--dark); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: 0.5s; }
         
         .screen { position: fixed; inset: 0; display: none; flex-direction: column; padding: 15px; overflow-y: auto; background: var(--dark); z-index: 10; }
         .active { display: flex; }
 
-        header { border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0; }
-        .xp-container { background: #111; height: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #333; overflow: hidden; position: relative; }
-        #xp-bar { background: linear-gradient(90deg, var(--neon), var(--purple)); height: 100%; width: 0%; transition: 1s cubic-bezier(0.15, 0.85, 0.45, 1); }
+        header { border-bottom: 2px solid var(--rank-color); padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0; transition: 0.5s; }
+        .xp-container { background: #111; height: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #333; overflow: hidden; }
+        #xp-bar { background: linear-gradient(90deg, var(--rank-color), var(--purple)); height: 100%; width: 0%; transition: 1s cubic-bezier(0.15, 0.85, 0.45, 1); }
 
-        .biometric-bar { background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.1); padding: 10px; border-radius: 4px; font-size: 0.7rem; margin-bottom: 15px; display: flex; justify-content: space-between; font-family: 'Orbitron'; }
+        .biometric-bar { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 4px; font-size: 0.7rem; margin-bottom: 15px; display: flex; justify-content: space-between; font-family: 'Orbitron'; }
 
         .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .card { background: var(--panel); border-left: 2px solid var(--neon); padding: 10px; border-radius: 4px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .card { background: var(--panel); border-left: 2px solid var(--rank-color); padding: 10px; border-radius: 4px; position: relative; transition: 0.5s; }
         .card .label { font-size: 0.6rem; color: #888; text-transform: uppercase; }
         .card .val { font-size: 1.2rem; font-weight: bold; font-family: 'Orbitron'; }
         .ap-btn { position: absolute; top: 5px; right: 5px; background: var(--green); color: black; border: none; border-radius: 3px; font-size: 0.5rem; padding: 2px 6px; font-weight: bold; cursor: pointer; display: none; }
 
-        .section-title { font-family: 'Orbitron'; font-size: 0.7rem; margin: 20px 0 10px; color: var(--neon); border-left: 2px solid var(--neon); padding-left: 8px; text-transform: uppercase; }
+        .section-title { font-family: 'Orbitron'; font-size: 0.7rem; margin: 20px 0 10px; color: var(--rank-color); border-left: 2px solid var(--rank-color); padding-left: 8px; text-transform: uppercase; transition: 0.5s; }
         
-        .quest-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .btn { background: rgba(0, 212, 255, 0.05); border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; transition: 0.2s; text-transform: uppercase; }
-        .btn:active { background: var(--neon); color: black; }
-        .btn-gold { border-color: var(--gold); color: var(--gold); }
+        .quest-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--rank-color); color: var(--rank-color); padding: 8px 12px; font-family: 'Orbitron'; font-size: 0.6rem; cursor: pointer; border-radius: 3px; transition: 0.3s; }
+        .btn:active { background: var(--rank-color); color: black; }
 
-        /* Inventário e Loja */
-        .inventory-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .item-card { background: rgba(255, 255, 255, 0.02); border: 1px solid #222; padding: 12px; border-radius: 5px; display: flex; flex-direction: column; gap: 8px; }
-        .item-info { font-size: 0.7rem; }
-        .item-qty { color: var(--neon); font-family: 'Orbitron'; font-size: 0.9rem; }
+        .battle-log { background: #000; border: 1px solid #222; padding: 10px; border-radius: 5px; height: 100px; overflow-y: auto; font-size: 0.6rem; color: #666; font-family: monospace; margin-top: 10px; }
+        .log-entry { margin-bottom: 4px; border-bottom: 1px solid #111; padding-bottom: 2px; }
 
         #dungeon-overlay { position: fixed; inset: 0; background: radial-gradient(circle, #0a0a1a, #000); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
         #penalty-alert { background: rgba(255, 0, 68, 0.2); border: 1px solid var(--red); color: var(--red); padding: 10px; margin-bottom: 10px; font-size: 0.7rem; text-align: center; font-family: 'Orbitron'; display: none; }
@@ -51,32 +51,33 @@
         <h2 style="font-family:'Orbitron'; color:var(--purple); margin-bottom:10px;">INSTÂNCIA ATIVA</h2>
         <div id="dungeon-timer" style="font-family:'Orbitron'; font-size:3.5rem; color:var(--purple);">00:00</div>
         <p id="dungeon-task" style="font-size:1.1rem; letter-spacing:1px; margin:20px 0; color:white;"></p>
-        <div style="color:var(--red); font-size:0.6rem; font-family:'Orbitron';">SISTEMA: NÃO MINIMIZE O APLICATIVO!</div>
+        <div style="color:var(--red); font-size:0.6rem; font-family:'Orbitron'; animation: blink 1s infinite;">AVISO: NÃO MINIMIZE O APLICATIVO!</div>
     </div>
 
     <div id="setup-screen" class="screen" style="justify-content: center;">
         <h2 style="font-family:'Orbitron'; color:var(--neon); text-align:center; margin-bottom:30px;">REGISTRO DE DESPERTADO</h2>
-        <input type="text" id="in-name" placeholder="NOME">
+        <input type="text" id="in-name" placeholder="NOME DO PLAYER">
         <input type="number" id="in-height" placeholder="ALTURA (cm)">
         <input type="number" id="in-weight" placeholder="PESO (kg)">
-        <button class="btn" onclick="completeSetup()" style="width:100%; padding:20px;">INICIAR CONTRATO</button>
+        <button class="btn" onclick="completeSetup()" style="width:100%; padding:20px;">DESPERTAR</button>
     </div>
 
     <main id="main-screen" class="screen">
-        <div id="penalty-alert">⚠️ PENALIDADE: VOCÊ FALHOU NO CICLO E REGREDIU!</div>
+        <div id="penalty-alert">⚠️ ALERTA: REGRESSÃO DE RANK DETECTADA!</div>
         
-        <header>
-            <div style="font-family:'Orbitron'; font-size:1.1rem;"><span id="display-name">---</span> <span id="lvl-display" style="float:right; color:var(--neon)">LV. 01</span></div>
+        <header id="main-header">
+            <div style="font-family:'Orbitron'; font-size:1.1rem;"><span id="display-name">---</span> <span id="rank-display" style="float:right; color:var(--rank-color)">RANK E</span></div>
+            <div id="lvl-tag" style="font-size: 0.6rem; color: #888; margin-top: 4px;">LEVEL 1</div>
             <div class="xp-container"><div id="xp-bar"></div></div>
-            <div style="display:flex; justify-content:space-between; font-size:0.6rem; font-family:'Orbitron'; color:#888;">
+            <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-family:'Orbitron'; color:#888;">
                 <span id="xp-text">0 / 100 XP</span>
                 <span>GOLD: <span id="gold-val" style="color:var(--gold)">0</span>G</span>
             </div>
         </header>
 
         <div class="biometric-bar">
-            <span>IMC: <span id="imc-val" style="color:var(--neon)">--</span></span>
-            <span id="imc-status" style="color:var(--neon)">--</span>
+            <span>IMC: <span id="imc-val" style="color:var(--rank-color)">--</span></span>
+            <span id="imc-status">--</span>
         </div>
 
         <div class="status-grid">
@@ -87,42 +88,29 @@
         <div class="section-title">Missões Diárias</div>
         <div id="quest-container"></div>
 
-        <div class="section-title">Inventário & Mercado</div>
-        <div class="inventory-row">
-            <div class="item-card">
-                <div class="item-info"><span style="color:var(--gold)">🧪 POÇÃO XP</span><br>+50 XP</div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span class="item-qty" id="qty-potion">0</span>
-                    <button class="btn" style="padding:4px 8px; font-size:0.5rem; border-color:var(--green); color:var(--green);" onclick="useItem('potion')">USAR</button>
-                </div>
-                <button class="btn btn-gold" style="width:100%; font-size:0.5rem;" onclick="buyItem('potion', 500)">COMPRAR (500G)</button>
-            </div>
-            
-            <div class="item-card" style="opacity:0.5;">
-                <div class="item-info"><span style="color:var(--purple)">🗝️ CHAVE PORTAL</span><br>Em breve...</div>
-                <div class="item-qty">0</div>
-                <button class="btn" style="width:100%; font-size:0.5rem;" disabled>BLOQUEADO</button>
-            </div>
+        <div class="section-title">Log de Batalha</div>
+        <div class="battle-log" id="battle-log">
+            <div class="log-entry">> Sistema inicializado...</div>
         </div>
 
-        <div class="section-title">Portais Disponíveis</div>
-        <div class="quest-box" style="border-color: var(--purple);">
-            <div><div style="font-size:0.5rem; color:var(--purple);">INSTÂNCIA</div><div style="font-size:0.8rem;">Foco Profundo (20 min)</div></div>
-            <button class="btn" style="border-color:var(--purple); color:var(--purple);" onclick="enterDungeon('Foco Profundo', 20, 'int')">ENTRAR</button>
+        <div class="section-title">Mercado & Portais</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button class="btn" style="border-color:var(--gold); color:var(--gold);" onclick="buyItem('potion', 500)">COMPRAR POÇÃO (500G)</button>
+            <button class="btn" style="border-color:var(--purple); color:var(--purple);" onclick="enterDungeon('Foco Profundo', 20)">DUNGEON (20m)</button>
         </div>
 
-        <button onclick="hardReset()" style="margin-top:40px; background:none; border:none; color:#333; font-size:0.5rem; text-decoration:underline; width:100%;">RESETAR DADOS DO SISTEMA</button>
+        <button onclick="hardReset()" style="margin-top:40px; background:none; border:none; color:#222; font-size:0.5rem; text-decoration:underline; width:100%;">APAGAR DADOS DO SISTEMA</button>
     </main>
 
     <script>
         const QUEST_DB = [
-            { id: 'q1', title: 'FÍSICO', desc: '15 min de atividade', xp: 25, type: 'str' },
-            { id: 'q2', title: 'ESTUDO', desc: '15 min de leitura', xp: 25, type: 'int' },
-            { id: 'q3', title: 'SAÚDE', desc: 'Beber 2L de água', xp: 25, type: 'str' },
-            { id: 'q4', title: 'DISCIPLINA', desc: 'Organizar ambiente', xp: 25, type: 'int' }
+            { id: 'q1', title: 'FÍSICO', desc: '15 min de atividade', xp: 25 },
+            { id: 'q2', title: 'ESTUDO', desc: '15 min de leitura', xp: 25 },
+            { id: 'q3', title: 'SAÚDE', desc: 'Beber 2L de água', xp: 25 },
+            { id: 'q4', title: 'DISCIPLINA', desc: 'Organizar ambiente', xp: 25 }
         ];
 
-        let stats = JSON.parse(localStorage.getItem('sl_data_final_v11')) || null;
+        let stats = JSON.parse(localStorage.getItem('sl_data_apex')) || null;
         let activeDungeon = null;
         let dungeonInterval = null;
 
@@ -131,47 +119,64 @@
             const h = parseFloat(document.getElementById('in-height').value) / 100;
             const w = parseFloat(document.getElementById('in-weight').value);
             if(!n || !h || !w) return;
-            stats = { name: n, h, w, imc: (w/(h*h)).toFixed(1), lvl: 1, xp: 0, str: 10, int: 10, gold: 0, ap: 0, inv: { potion: 0 }, completed: [], last: new Date().toLocaleDateString() };
+            stats = { name: n, h, w, imc: (w/(h*h)).toFixed(1), xp: 0, str: 10, int: 10, gold: 0, ap: 0, inv: { potion: 0 }, completed: [], last: new Date().toLocaleDateString(), logs: [] };
+            addLog("Contrato assinado. O Despertar começou.");
             save(); render();
         }
 
-        function getLvlData(xp) {
-            let lvl = 1;
-            let tempXP = xp;
-            while (tempXP >= (lvl * 100)) {
-                tempXP -= (lvl * 100);
-                lvl++;
+        function getProgress(xp) {
+            let level = 1;
+            let xpRequired = 100;
+            let totalNeededForPrevLevels = 0;
+            
+            while (xp >= (totalNeededForPrevLevels + (level * 100))) {
+                totalNeededForPrevLevels += (level * 100);
+                level++;
             }
-            return { lvl, currentXp: tempXP, nextXpMax: lvl * 100 };
+            
+            let currentLevelXP = xp - totalNeededForPrevLevels;
+            let nextLevelGoal = level * 100;
+            
+            let rank = "E";
+            let color = "#00d4ff";
+            if(level >= 10) { rank = "D"; color = "#00ff88"; }
+            if(level >= 20) { rank = "C"; color = "#ffd700"; }
+            if(level >= 30) { rank = "B"; color = "#ff8800"; }
+            if(level >= 40) { rank = "A"; color = "#a333ff"; }
+            if(level >= 50) { rank = "S"; color = "#ff0044"; }
+
+            return { level, currentLevelXP, nextLevelGoal, rank, color };
         }
 
-        function save() { localStorage.setItem('sl_data_final_v11', JSON.stringify(stats)); }
+        function save() { localStorage.setItem('sl_data_apex', JSON.stringify(stats)); }
+
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            stats.logs.unshift(`[${time}] ${msg}`);
+            if(stats.logs.length > 10) stats.logs.pop();
+        }
 
         function addXP(amt) {
-            const oldLvl = getLvlData(stats.xp).lvl;
+            const oldLvl = getProgress(stats.xp).level;
             stats.xp += amt;
-            const newLvl = getLvlData(stats.xp).lvl;
-            if(newLvl > oldLvl) { stats.ap += (newLvl - oldLvl) * 3; alert(`LEVEL UP! +${(newLvl - oldLvl) * 3} AP Ganhos.`); }
+            const neu = getProgress(stats.xp).level;
+            if(neu > oldLvl) { 
+                stats.ap += (neu - oldLvl) * 3; 
+                addLog(`SUBIU DE NÍVEL! Agora Level ${neu}.`);
+            }
             save(); render();
         }
 
+        function distributeAP(type) { if(stats.ap > 0) { stats.ap--; stats[type]++; addLog(`Ponto atribuído a ${type.toUpperCase()}.`); save(); render(); } }
+
         function buyItem(item, cost) {
-            if(stats.gold >= cost) { stats.gold -= cost; stats.inv[item]++; save(); render(); }
+            if(stats.gold >= cost) { stats.gold -= cost; stats.inv[item]++; addLog("Poção de XP adquirida."); save(); render(); }
             else alert("Gold insuficiente!");
         }
 
-        function useItem(item) {
-            if(stats.inv[item] > 0) {
-                if(item === 'potion') { stats.inv[item]--; addXP(50); }
-                save(); render();
-            } else alert("Você não possui este item!");
-        }
-
-        function distributeAP(type) { if(stats.ap > 0) { stats.ap--; stats[type]++; save(); render(); } }
-
-        function enterDungeon(name, mins, type) {
-            if(!confirm("Entrar na instância? Sair do app causará perda massiva de XP.")) return;
-            activeDungeon = { name, type, seconds: mins * 60 };
+        function enterDungeon(name, mins) {
+            if(!confirm("Entrar na instância? A fuga custará seu nível!")) return;
+            activeDungeon = { name, seconds: mins * 60 };
             document.getElementById('dungeon-overlay').style.display = 'flex';
             document.getElementById('dungeon-task').innerText = name.toUpperCase();
             dungeonInterval = setInterval(() => {
@@ -181,10 +186,10 @@
                 document.getElementById('dungeon-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
                 if(activeDungeon.seconds <= 0) {
                     clearInterval(dungeonInterval);
-                    stats.gold += 450; addXP(180);
+                    stats.gold += 500; addXP(200);
+                    addLog("Dungeon concluída com sucesso.");
                     document.getElementById('dungeon-overlay').style.display = 'none';
                     activeDungeon = null;
-                    alert("INSTÂNCIA CONCLUÍDA!");
                 }
             }, 1000);
         }
@@ -192,10 +197,13 @@
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && activeDungeon) {
                 clearInterval(dungeonInterval);
+                const oldLvl = getProgress(stats.xp).level;
                 stats.xp = Math.max(0, stats.xp - 300);
+                const newLvl = getProgress(stats.xp).level;
                 activeDungeon = null;
                 document.getElementById('dungeon-overlay').style.display = 'none';
-                alert("ALERTA: INSTÂNCIA INTERROMPIDA! PENALIDADE SEVERA DE XP.");
+                addLog(`FALHA NA DUNGEON! Perda de XP detectada.`);
+                if(newLvl < oldLvl) addLog(`REGRESSÃO: Caçador caiu para Level ${newLvl}.`);
                 save(); render();
             }
         });
@@ -205,26 +213,33 @@
             document.getElementById('setup-screen').classList.remove('active');
             document.getElementById('main-screen').classList.add('active');
 
-            const l = getLvlData(stats.xp);
+            const p = getProgress(stats.xp);
+            document.body.style.setProperty('--rank-color', p.color);
+            
             document.getElementById('display-name').innerText = stats.name.toUpperCase();
-            document.getElementById('lvl-display').innerText = `LV. ${l.lvl}`;
-            document.getElementById('xp-bar').style.width = (l.currentXp / l.nextXpMax * 100) + "%";
-            document.getElementById('xp-text').innerText = `${l.currentXp} / ${l.nextXpMax} XP (Total: ${stats.xp})`;
+            document.getElementById('rank-display').innerText = `RANK ${p.rank}`;
+            document.getElementById('rank-display').style.color = p.color;
+            document.getElementById('lvl-tag').innerText = `LEVEL ${p.level}`;
+            
+            document.getElementById('xp-bar').style.width = (p.currentLevelXP / p.nextLevelGoal * 100) + "%";
+            document.getElementById('xp-text').innerText = `${Math.floor(p.currentLevelXP)} / ${p.nextLevelGoal} XP`;
             document.getElementById('gold-val').innerText = stats.gold;
             document.getElementById('str-val').innerText = stats.str;
             document.getElementById('int-val').innerText = stats.int;
             document.getElementById('imc-val').innerText = stats.imc;
-            document.getElementById('imc-status').innerText = stats.imc < 25 ? "PESO IDEAL" : "ALERTA";
-            document.getElementById('qty-potion').innerText = stats.inv.potion;
+            document.getElementById('imc-status').innerText = stats.imc < 25 ? "CONDIÇÃO: NORMAL" : "CONDIÇÃO: ALERTA";
 
             document.querySelectorAll('.ap-btn').forEach(b => b.style.display = stats.ap > 0 ? 'block' : 'none');
+
+            const logCont = document.getElementById('battle-log');
+            logCont.innerHTML = stats.logs.map(l => `<div class="log-entry">> ${l}</div>`).join('');
 
             const qCont = document.getElementById('quest-container');
             qCont.innerHTML = "";
             QUEST_DB.filter(q => !stats.completed.includes(q.id)).forEach(q => {
                 qCont.innerHTML += `<div class="quest-box">
-                    <div><div style="font-size:0.5rem; color:var(--neon);">${q.title}</div><div style="font-size:0.8rem;">${q.desc}</div></div>
-                    <button class="btn" onclick="stats.completed.push('${q.id}'); stats.gold+=120; addXP(${q.xp});">OK</button>
+                    <div><div style="font-size:0.5rem; color:var(--rank-color);">${q.title}</div><div style="font-size:0.8rem;">${q.desc}</div></div>
+                    <button class="btn" onclick="stats.completed.push('${q.id}'); stats.gold+=120; addLog('Missão ${q.title} concluída.'); addXP(${q.xp});">OK</button>
                 </div>`;
             });
         }
@@ -232,7 +247,10 @@
         function hardReset() { if(confirm("Deseja apagar tudo?")) { localStorage.clear(); location.reload(); } }
         window.onload = () => { 
             if(stats && stats.last !== new Date().toLocaleDateString()) {
-                if(stats.completed.length < QUEST_DB.length) { stats.xp = Math.max(0, stats.xp - 180); document.getElementById('penalty-alert').style.display = 'block'; }
+                if(stats.completed.length < QUEST_DB.length) { 
+                    stats.xp = Math.max(0, stats.xp - 200); 
+                    addLog("Penalidade diária aplicada por negligência.");
+                }
                 stats.completed = []; stats.last = new Date().toLocaleDateString(); save();
             }
             render(); 
