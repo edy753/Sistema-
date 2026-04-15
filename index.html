@@ -1,64 +1,98 @@
-<script>
-    const terminal = document.getElementById('terminal');
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - SYSTEM</title>
+    <style>
+        :root { --neon-blue: #00d4ff; --dark-void: #050505; --rank-e: #888; }
+        body { background: var(--dark-void); color: white; font-family: 'Orbitron', sans-serif; margin: 0; overflow-x: hidden; }
+        
+        /* Header Estilo Solo Leveling */
+        .status-bar { border-left: 4px solid var(--neon-blue); padding: 15px; margin: 20px; background: rgba(0,212,255,0.05); }
+        .rank-tag { font-size: 2rem; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        
+        /* Sistema de Missões */
+        .quest-box { border: 1px solid #333; margin: 20px; padding: 15px; border-radius: 5px; }
+        .quest-item { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 10px; background: #111; }
+        .btn-complete { background: var(--neon-blue); border: none; color: black; font-weight: bold; padding: 5px 10px; }
 
-    function log(msg) {
-        const time = new Date().toLocaleTimeString();
-        terminal.innerHTML += `<br>[${time}] ${msg}`;
-        terminal.scrollTop = terminal.scrollHeight;
-    }
+        /* Arthur Chat Interface */
+        #arthur-chat { position: fixed; bottom: 0; width: 100%; background: #0a0a0a; border-top: 2px solid var(--neon-blue); display: none; height: 50vh; flex-direction: column; }
+        .chat-log { flex: 1; overflow-y: auto; padding: 15px; font-size: 0.9rem; color: #aaa; }
+        .chat-input { background: #000; border: none; border-top: 1px solid #333; color: var(--neon-blue); padding: 15px; outline: none; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
-    function addCommand(label, action) {
-        const grid = document.getElementById('command-grid');
-        const btn = document.createElement('button');
-        btn.className = 'nexus-btn';
-        btn.innerText = label;
-        btn.onclick = () => {
-            log(`EXECUTANDO: ${label}`);
-            action();
-        };
-        grid.appendChild(btn);
-    }
+    <div class="status-bar">
+        <div>JOGADOR: <span id="player-name">USUÁRIO</span></div>
+        <div class="rank-tag" id="player-rank">RANK E</div>
+        <div style="font-size: 12px;">NÍVEL: <span id="player-lvl">1</span> | XP: <span id="player-xp">0</span>/100</div>
+    </div>
 
-    // --- COMANDOS CONFIGURADOS POR MIM (NEXUS CORE) ---
+    <div class="quest-box">
+        <h3>MISSÕES DIÁRIAS</h3>
+        <div id="quest-list">
+            <div class="quest-item">
+                <span>Flexões (0/100)</span>
+                <button class="btn-complete" onclick="addXP(20)">CONCLUIR</button>
+            </div>
+        </div>
+    </div>
 
-    // 1. MULTI-SEARCH (Abre pesquisas em série)
-    addCommand("Pesquisa Global", () => {
-        const termo = prompt("O que deseja buscar em múltiplas fontes?");
-        if(termo) {
-            window.open(`https://www.google.com/search?q=${termo}`, '_blank');
-            log(`Busca iniciada para: ${termo}`);
+    <button onclick="toggleArthur()" style="width: 100%; padding: 15px; background: none; color: var(--neon-blue); border: 1px solid var(--neon-blue); margin-top: 20px;">CONSULTAR ARTHUR (IA)</button>
+
+    <div id="arthur-chat">
+        <div class="chat-log" id="chat-log">
+            <div>[ARTHUR]: Sistema inicializado. O que deseja saber, Caçador?</div>
+        </div>
+        <input type="text" class="chat-input" id="chat-in" placeholder="Pergunte algo ao Arthur..." onkeypress="arthurTalk(event)">
+    </div>
+
+    <script>
+        let stats = JSON.parse(localStorage.getItem('nexus_stats')) || { xp: 0, lvl: 1, rank: 'E' };
+
+        function updateDisplay() {
+            document.getElementById('player-xp').innerText = stats.xp;
+            document.getElementById('player-lvl').innerText = stats.lvl;
+            document.getElementById('player-rank').innerText = 'RANK ' + stats.rank;
+            localStorage.setItem('nexus_stats', JSON.stringify(stats));
         }
-    });
 
-    // 2. TEXT TRANSFORM (Limpeza de formatação para colagem)
-    addCommand("Limpar Texto", async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            const cleanText = text.replace(/\s+/g, ' ').trim();
-            await navigator.clipboard.writeText(cleanText);
-            log("Clipboard limpo e normalizado.");
-        } catch (err) {
-            log("Erro: Necessário permissão de Clipboard.");
+        function addXP(amount) {
+            stats.xp += amount;
+            if(stats.xp >= 100) {
+                stats.xp = 0;
+                stats.lvl++;
+                alert("LEVEL UP! Você está mais forte.");
+            }
+            updateDisplay();
         }
-    });
 
-    // 3. WORKSPACE (Abre suas ferramentas de uma vez)
-    addCommand("Abrir Workspace", () => {
-        // Exemplo de links profissionais - pode ser alterado
-        const links = ['https://gmail.com', 'https://web.whatsapp.com'];
-        links.forEach(link => window.open(link, '_blank'));
-        log("Ferramentas de trabalho abertas.");
-    });
-
-    // 4. SYSTEM INFO (Diagnóstico do Dispositivo)
-    addCommand("Status Sistema", () => {
-        const info = `Resolução: ${window.innerWidth}x${window.innerHeight} | Bateria: Verificando...`;
-        log(info);
-        if ('getBattery' in navigator) {
-            navigator.getBattery().then(batt => {
-                log(`Bateria: ${Math.round(batt.level * 100)}% - ${batt.charging ? 'Carregando' : 'Descarregando'}`);
-            });
+        function toggleArthur() {
+            const chat = document.getElementById('arthur-chat');
+            chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex';
         }
-    });
 
-</script>
+        function arthurTalk(e) {
+            if(e.key === 'Enter') {
+                const input = document.getElementById('chat-in');
+                const log = document.getElementById('chat-log');
+                log.innerHTML += `<div>[VOCÊ]: ${input.value}</div>`;
+                
+                // Lógica Simples do Arthur (Pode ser expandida com API)
+                setTimeout(() => {
+                    log.innerHTML += `<div style="color:var(--neon-blue)">[ARTHUR]: Analisando dados... Sua eficiência atual é de ${(stats.lvl * 0.5).toFixed(1)}%. Continue treinando.</div>`;
+                    log.scrollTop = log.scrollHeight;
+                }, 1000);
+                
+                input.value = '';
+            }
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>
